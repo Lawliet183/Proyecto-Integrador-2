@@ -1,0 +1,6 @@
+@QRISK3.backend_HostAddress = http://localhost:5111
+
+GET {{QRISK3.backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
