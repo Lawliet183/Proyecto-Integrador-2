@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import {
   AuthContainer, AuthCard, AuthTitle,
   FormGroup, Label, Input,
@@ -27,7 +28,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
+ 
     try {
       // Ajusta el puerto (ej. 5001) para coincidir con la ejecución de .NET
       const response = await fetch(`${devServerUrl}/api/auth/login`, {
@@ -38,16 +39,32 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        // Almacenar el token en el navegador
-        localStorage.setItem('token', data.token);
+  if (response.ok && data.success) {
+          // Almacenar el token en el navegador
+          localStorage.setItem('token', data.token);
 
-        // Navegar a la pantalla de evaluación
-        navigate('/evaluacion');
-      } else {
-        // Mostrar mensaje de credenciales incorrectas desde el backend
-        setError(data.message || 'Error al autenticar.');
-      }
+          // -- NUEVO CÓDIGO: Decodificar y redirigir según el rol --
+          try {
+            const decoded = jwtDecode(data.token);
+            
+            if (decoded.rol === 'Administrador') {
+              // Si es admin (puedes crear esta ruta más adelante)
+              navigate('/admin/pacientes');
+              window.location.reload(); // Forzar recarga rápida del contexto
+            } else {
+              // Si es paciente
+              navigate('/evaluacion');
+              window.location.reload(); // Forzar recarga rápida del contexto
+            }
+          } catch (error) {
+            setError('Error al leer los datos de sesión.');
+          }
+          // ---------------------------------------------------------
+        } else {
+          // Mostrar mensaje de credenciales incorrectas desde el backend
+          setError(data.message || 'Error al autenticar.');
+        }
+
     } catch (err) {
       setError('Error de red. Verifica que el backend esté en ejecución: ' + err.message);
     } finally {
