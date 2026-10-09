@@ -5,9 +5,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './Login';
 import Register from './Register';
 import EvaluationForm from './EvaluationForm';
+import AdminPacientes from './AdminPacientes';
+import Historial from './Historial';
+import PacienteDashboard from './PacienteDashboard';
+import EvaluacionDetalle from './EvaluacionDetalle';
 
-// Importación de los componentes de seguridad (Asegúrate de crear estos archivos)
-import { AuthProvider } from './AuthContext';
+// Importación de los componentes de seguridad
 import ProtectedRoute from './ProtectedRoute';
 
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
@@ -35,12 +38,29 @@ const App = () => {
         {/* Redirección por defecto para la raíz */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Rutas Protegidas */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/evaluacion" element={<EvaluationForm />} />
-          {/* <Route path="/historial" element={<Historial />} /> */}
 
-          {/* Puedes agregar aquí cualquier otra ruta que requiera autenticación */}
+        {/* Rutas exclusivas del Paciente */}
+        <Route element={<ProtectedRoute requiredRole="Paciente" />}>
+          {/* Agregamos el dashboard */}
+          <Route path="/dashboard" element={<PacienteDashboard />} />
+        
+          <Route path="/evaluacion" element={<EvaluationForm />} />
+
+          {/* El paciente ve su historial sin pasar ID */}
+          <Route path="/historial" element={<Historial />} />
+          
+          <Route path="/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
+        </Route>
+
+
+        {/* Rutas exclusivas del Administrador */}
+        <Route element={<ProtectedRoute requiredRole="Administrador" />}>
+          <Route path="/admin/pacientes" element={<AdminPacientes />} />
+
+          {/* El admin ve el historial pasando el ID en la URL */}
+          <Route path="/admin/historial/:pacienteId" element={<Historial />} />
+          
+          <Route path="/admin/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
         </Route>
       </Routes>
     </Router>

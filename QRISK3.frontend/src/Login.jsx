@@ -53,7 +53,7 @@ const Login = () => {
             navigate('/admin/pacientes');
           } else {
             // Si es paciente
-            navigate('/evaluacion');
+            navigate('/dashboard');
           }
         } catch (error) {
           setError('Error al leer los datos de sesión.');

@@ -96,7 +96,7 @@ const Register = ({ onNavigateToLogin }) => {
         localStorage.setItem('token', data.token);
 
         // Redirigimos directamente al cuestionario médico
-        navigate('/evaluacion');
+        navigate('/dashboard');
       } else {
         setError(data.message || 'Ocurrió un error al registrar la cuenta.');
       }

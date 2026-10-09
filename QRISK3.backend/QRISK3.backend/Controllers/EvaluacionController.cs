@@ -1,21 +1,22 @@
-﻿using System;
-using System.Net.Cache;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QRISK3.backend.Data;
 using QRISK3.backend.Entities;
 using QRISK3.backend.Models;
 using QRISK3.backend.Services;
+using System;
+using System.Diagnostics;
+using System.Net.Cache;
+using System.Threading.Tasks;
 
 namespace QRISK3.backend.Controllers;
 
 [ApiController]
-[Route("api/pacientes/{expedienteId}/[controller]")]
+[Route("api/[controller]")]
 public class EvaluacionController : ControllerBase
 {
-	private readonly AppDbContext _dbContext;
+	private readonly AppDbContext _context;
 	private readonly DataImputationService _imputationService;
 	private readonly QDiabetesRiskEngine _riskEngine;
 
@@ -25,21 +26,26 @@ public class EvaluacionController : ControllerBase
 		DataImputationService imputationService,
 		QDiabetesRiskEngine riskEngine)
 	{
-		_dbContext = dbContext;
+		_context = dbContext;
 		_imputationService = imputationService;
 		_riskEngine = riskEngine;
 	}
 
 	[HttpPost]
 	[Authorize]
-	public async Task<IActionResult> CrearEvaluacion(int expedienteId, [FromBody] PatientData rawData)
+	public async Task<IActionResult> CrearEvaluacion([FromBody] PatientData rawData)
 	{
 		try
 		{
+			var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+			if (string.IsNullOrEmpty(userId))
+				return Unauthorized(new { Success = false, Message = "Token inválido." });
+
 			// 1. Obtener el expediente y los datos del paciente unidos desde MySQL
-			var expediente = await _dbContext.ExpedientesClinicos
+			var expediente = await _context.ExpedientesClinicos
 				.Include(e => e.Paciente) // Navegamos la llave foránea hacia el Paciente
-				.FirstOrDefaultAsync(e => e.Id == expedienteId);
+				.FirstOrDefaultAsync(e => e.Paciente.UsuarioId.ToString() == userId);
 
 			if (expediente == null || expediente.Paciente == null)
 			{
@@ -69,11 +75,11 @@ public class EvaluacionController : ControllerBase
 			double riskPercentage = _riskEngine.Calculate10YearRisk(cleanData);
 
 			// 5. Construir la entidad
-			EvaluacionRiesgo nuevaEvaluacion = MapearAEvaluacion(expedienteId, cleanData, riskPercentage);
+			EvaluacionRiesgo nuevaEvaluacion = MapearAEvaluacion(expediente.Id, cleanData, riskPercentage);
 
 			// 6. Persistir
-			_dbContext.EvaluacionesRiesgo.Add(nuevaEvaluacion);
-			await _dbContext.SaveChangesAsync();
+			_context.EvaluacionesRiesgo.Add(nuevaEvaluacion);
+			await _context.SaveChangesAsync();
 
 			return Ok(new
 			{
@@ -87,6 +93,45 @@ public class EvaluacionController : ControllerBase
 		{
 			return StatusCode(500, new { Success = false, Error = ex.Message });
 		}
+	}
+
+	[HttpGet("historial")]
+	[Authorize] // Solo requiere estar logueado (el frontend controla que sea paciente)
+	public async Task<IActionResult> ObtenerMiHistorial()
+	{
+		// Extraemos el ID del usuario directamente del token (NameIdentifier)
+		var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+		var evaluaciones = await _context.EvaluacionesRiesgo
+			.Where(e => e.Expediente.Paciente.UsuarioId.ToString() == userId)
+			.OrderByDescending(e => e.FechaEvaluacion)
+			.Select(e => new {
+				e.Id,
+				e.FechaEvaluacion,
+				e.EdadAlEvaluar,
+				e.Imc,
+				e.PresionSistolica,
+				e.RiesgoPorcentaje
+			})
+			.ToListAsync();
+
+		return Ok(new { success = true, data = evaluaciones });
+	}
+
+	[HttpGet("{id}")]
+	[Authorize]
+	public async Task<IActionResult> ObtenerDetalle(int id)
+	{
+		var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+		var evaluacion = await _context.EvaluacionesRiesgo
+			.Where(e => e.Id == id && e.Expediente.Paciente.UsuarioId.ToString() == userId)
+			.FirstOrDefaultAsync();
+
+		if (evaluacion == null)
+			return NotFound(new { success = false, message = "Evaluación no encontrada o no autorizada." });
+
+		return Ok(new { success = true, data = evaluacion });
 	}
 
 

@@ -119,19 +119,9 @@ const EvaluationForm = () => {
         return;
       }
 
-      const decodedToken = jwtDecode(token);
-      const expedienteId = decodedToken?.expedienteId;
-
-      if (!expedienteId) {
-        console.error("Token sin expediente asociado");
-        return;
-      }
-
       // --- NUEVO: Limpieza del Payload ---
       // Clonamos el estado para no mutar directamente formData
       const cleanedPayload = { ...formData };
-      
-      console.log(cleanedPayload);
 
       // Recorremos las propiedades y convertimos los textos vacíos a null
       Object.keys(cleanedPayload).forEach(key => {
@@ -141,7 +131,7 @@ const EvaluationForm = () => {
       });
       // ------------------------------------
 
-      const response = await fetch(`${devServerUrl}/api/pacientes/${expedienteId}/evaluacion`, {
+      const response = await fetch(`${devServerUrl}/api/evaluacion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +165,8 @@ const EvaluationForm = () => {
 
   const handleReset = () => {
     setResultData(null);
-    setCurrentStep(1);
+    // setCurrentStep(1);
+    navigate('/dashboard');
     // Opcional: limpiar el formData si quieres que empiece desde cero
   };
 
@@ -186,7 +177,7 @@ const EvaluationForm = () => {
         riskPercentage={resultData.riskPercentage}
         imc={resultData.imc}
         onSave={() => navigate('/historial')}
-        onNewEvaluation={handleReset}
+        onGoToDashboard={handleReset}
       />
     );
   }

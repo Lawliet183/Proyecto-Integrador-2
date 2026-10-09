@@ -83,7 +83,7 @@ const ButtonStack = styled.div`
 
 // --- Componente Principal ---
 
-const DiagnosticResult = ({ riskPercentage, imc, onSave, onNewEvaluation }) => {
+const DiagnosticResult = ({ riskPercentage, imc, onSave, onGoToDashboard }) => {
 
   // 1. Lógica matemática para el SVG
   const radius = 70;
@@ -147,8 +147,8 @@ const DiagnosticResult = ({ riskPercentage, imc, onSave, onNewEvaluation }) => {
           </PrimaryButton>
 
           {/* El botón claro secundario */}
-          <SecondaryButton onClick={onNewEvaluation} type="button">
-            Nueva evaluacion
+          <SecondaryButton onClick={onGoToDashboard} type="button">
+            Regresar al dashboard
           </SecondaryButton>
         </ButtonStack>
 

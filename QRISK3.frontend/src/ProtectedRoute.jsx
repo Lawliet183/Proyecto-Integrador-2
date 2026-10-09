@@ -1,17 +1,28 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-const ProtectedRoute = () => {
-  // Verificamos si existe el token en el almacenamiento local
+const ProtectedRoute = ({ requiredRole }) => {
   const token = localStorage.getItem('token');
 
   if (!token) {
-    // replace=true evita que el usuario pueda usar el botón "Atrás" del 
-    // navegador para volver a la ruta bloqueada, evitando bucles infinitos.
     return <Navigate to="/login" replace />;
   }
 
-  // Si el token existe, permitimos que se rendericen los componentes hijos
+  try {
+    const decoded = jwtDecode(token);
+
+    // Si la ruta exige un rol (ej. "Administrador") y el usuario no lo es
+    if (requiredRole && decoded.rol !== requiredRole) {
+      // Lo expulsamos a su vista predeterminada
+      return <Navigate to="/dashboard" replace />;
+    }
+  } catch (error) {
+    localStorage.removeItem('token');
+    return <Navigate to="/login" replace />;
+  }
+
+  // Si pasa todas las validaciones, renderiza la vista
   return <Outlet />;
 };
 
