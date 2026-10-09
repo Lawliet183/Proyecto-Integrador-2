@@ -1,20 +1,18 @@
-import { Navigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from './AuthContext';
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user } = useContext(AuthContext);
+const ProtectedRoute = () => {
+  // Verificamos si existe el token en el almacenamiento local
+  const token = localStorage.getItem('token');
 
-  if (!user) {
+  if (!token) {
+    // replace=true evita que el usuario pueda usar el botón "Atrás" del 
+    // navegador para volver a la ruta bloqueada, evitando bucles infinitos.
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.rol)) {
-   
-    return <Navigate to={user.rol === 'Paciente' ? '/evaluacion' : '/dashboard'} replace />;
-  }
-
-  return children;
+  // Si el token existe, permitimos que se rendericen los componentes hijos
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

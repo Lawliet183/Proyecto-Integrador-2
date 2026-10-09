@@ -26,6 +26,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     setIsLoading(true);
     setError('');
  
@@ -39,32 +40,29 @@ const Login = () => {
 
       const data = await response.json();
 
-  if (response.ok && data.success) {
-          // Almacenar el token en el navegador
-          localStorage.setItem('token', data.token);
+      if (response.ok && data.success) {
+        // Almacenar el token en el navegador
+        localStorage.setItem('token', data.token);
 
-          // -- NUEVO CÓDIGO: Decodificar y redirigir según el rol --
-          try {
-            const decoded = jwtDecode(data.token);
-            
-            if (decoded.rol === 'Administrador') {
-              // Si es admin (puedes crear esta ruta más adelante)
-              navigate('/admin/pacientes');
-              window.location.reload(); // Forzar recarga rápida del contexto
-            } else {
-              // Si es paciente
-              navigate('/evaluacion');
-              window.location.reload(); // Forzar recarga rápida del contexto
-            }
-          } catch (error) {
-            setError('Error al leer los datos de sesión.');
+        // -- NUEVO CÓDIGO: Decodificar y redirigir según el rol --
+        try {
+          const decoded = jwtDecode(data.token);
+          
+          if (decoded.rol === 'Administrador') {
+            // Si es admin (puedes crear esta ruta más adelante)
+            navigate('/admin/pacientes');
+          } else {
+            // Si es paciente
+            navigate('/evaluacion');
           }
-          // ---------------------------------------------------------
-        } else {
-          // Mostrar mensaje de credenciales incorrectas desde el backend
-          setError(data.message || 'Error al autenticar.');
+        } catch (error) {
+          setError('Error al leer los datos de sesión.');
         }
-
+        // ---------------------------------------------------------
+      } else {
+        // Mostrar mensaje de credenciales incorrectas desde el backend
+        setError(data.message || 'Error al autenticar.');
+      }
     } catch (err) {
       setError('Error de red. Verifica que el backend esté en ejecución: ' + err.message);
     } finally {

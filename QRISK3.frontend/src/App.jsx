@@ -26,44 +26,24 @@ const App = () => {
   }, []);
   
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Redirección inicial hacia el login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+    <Router>
+      <Routes>
+        {/* Rutas Públicas */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Register />} />
 
-          {/* Rutas de Autenticación (Públicas) */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Register />} />
+        {/* Redirección por defecto para la raíz */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* Ruta Principal del Sistema (Protegida para Pacientes) */}
-          <Route 
-            path="/evaluacion" 
-            element={
-              <ProtectedRoute allowedRoles={['Paciente']}>
-                <EvaluationForm />
-              </ProtectedRoute>
-            } 
-          />
+        {/* Rutas Protegidas */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/evaluacion" element={<EvaluationForm />} />
+          {/* <Route path="/historial" element={<Historial />} /> */}
 
-          {/* ESPACIO PARA RUTAS DE ADMINISTRADOR */}
-          {/* Descomenta y ajusta estas rutas cuando crees las vistas del Admin */}
-          {/* 
-          <Route 
-            path="/admin/pacientes" 
-            element={
-              <ProtectedRoute allowedRoles={['Administrador']}>
-                <AdminPacientesCRUD /> 
-              </ProtectedRoute>
-            } 
-          />
-          */}
-
-          {/* Manejo de rutas no encontradas (404) */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+          {/* Puedes agregar aquí cualquier otra ruta que requiera autenticación */}
+        </Route>
+      </Routes>
+    </Router>
   );
 };
 
