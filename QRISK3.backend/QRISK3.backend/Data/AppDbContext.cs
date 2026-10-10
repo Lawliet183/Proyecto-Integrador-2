@@ -9,31 +9,33 @@ public class AppDbContext : DbContext
 	{
 	}
 
+
 	// Registramos las tablas
 	public DbSet<Usuario> Usuarios { get; set; }
 	public DbSet<Paciente> Pacientes { get; set; }
 	public DbSet<ExpedienteClinico> ExpedientesClinicos { get; set; }
 	public DbSet<EvaluacionRiesgo> EvaluacionesRiesgo { get; set; }
 
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
 
-		// 1. Configuración de la relación 1 a 1: Usuario <-> Paciente
+		// Configuración de la relación 1 a 1: Usuario <-> Paciente
 		modelBuilder.Entity<Usuario>()
 			.HasOne(u => u.Paciente)
 			.WithOne(p => p.Usuario)
 			.HasForeignKey<Paciente>(p => p.UsuarioId)
 			.OnDelete(DeleteBehavior.Cascade); // Si se borra el usuario, se borra el paciente
 
-		// 2. Configuración de la relación 1 a 1: Paciente <-> ExpedienteClinico
+		// Configuración de la relación 1 a 1: Paciente <-> ExpedienteClinico
 		modelBuilder.Entity<Paciente>()
 			.HasOne(p => p.Expediente)
 			.WithOne(e => e.Paciente)
 			.HasForeignKey<ExpedienteClinico>(e => e.PacienteId)
 			.OnDelete(DeleteBehavior.Cascade); // Si se borra el paciente, se borra su expediente
 
-		// 3. Configuración de la relación 1 a Muchos: ExpedienteClinico <-> EvaluacionRiesgo
+		// Configuración de la relación 1 a Muchos: ExpedienteClinico <-> EvaluacionRiesgo
 		modelBuilder.Entity<ExpedienteClinico>()
 			.HasMany(e => e.Evaluaciones)
 			.WithOne(ev => ev.Expediente)

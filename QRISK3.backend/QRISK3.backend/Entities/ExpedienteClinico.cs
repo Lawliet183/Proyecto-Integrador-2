@@ -19,13 +19,14 @@ public class ExpedienteClinico
 	[Column("fecha_creacion")]
 	public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
-	// --- Propiedades de Navegación ---
 
-	// Relación hacia atrás (1:1 con Paciente)
+	// Propiedades de Navegacion
+
+	// Relacion hacia atras (1:1 con Paciente)
 	[ForeignKey("PacienteId")]
 	public virtual Paciente Paciente { get; set; }
 
-	// Relación hacia adelante (1 a Muchos con EvaluacionRiesgo)
+	// Relacion hacia adelante (1 a Muchos con EvaluacionRiesgo)
 	// Un expediente puede tener múltiples evaluaciones a lo largo de los años
 	public virtual ICollection<EvaluacionRiesgo> Evaluaciones { get; set; } = new List<EvaluacionRiesgo>();
 }

@@ -18,7 +18,8 @@ public class EvaluacionRiesgo
 	[Column("fecha_evaluacion")]
 	public DateTime FechaEvaluacion { get; set; } = DateTime.UtcNow;
 
-	// --- Bloque Demográfico / Físico ---
+
+	// Bloque Demografico / Fisico
 	[Required]
 	[Column("edad_al_evaluar")]
 	public int EdadAlEvaluar { get; set; }
@@ -37,7 +38,8 @@ public class EvaluacionRiesgo
 	[Column("imc_imputado")]
 	public bool ImcImputado { get; set; }
 
-	// --- Variables Demográficas Adicionales ---
+
+	// Variables Demograficas Adicionales
 	[Required]
 	[Column("origen_etnico")]
 	public int OrigenEtnico { get; set; }
@@ -50,7 +52,8 @@ public class EvaluacionRiesgo
 	[Column("indice_townsend", TypeName = "decimal(5,2)")]
 	public decimal IndiceTownsend { get; set; }
 
-	// --- Bloque Clínico con Trazabilidad ---
+
+	// Bloque Clinico
 	[Required]
 	[Column("presion_sistolica", TypeName = "decimal(5,2)")]
 	public decimal PresionSistolica { get; set; }
@@ -71,7 +74,8 @@ public class EvaluacionRiesgo
 	[Column("ratio_colesterol_imputado")]
 	public bool RatioColesterolImputado { get; set; }
 
-	// --- Bloque de Comorbilidades ---
+
+	// Bloque de Comorbilidades
 	[Required]
 	[Column("tratamiento_hipertension")]
 	public bool TratamientoHipertension { get; set; }
@@ -128,13 +132,14 @@ public class EvaluacionRiesgo
 	[Column("bajon_peso_involuntario")]
 	public bool BajonPesoInvoluntario { get; set; }
 
-	// --- Bloque de Resultado Final ---
+
+	// Bloque de Resultado Final
 	[Required]
 	[Column("riesgo_porcentaje", TypeName = "decimal(5,2)")]
 	public decimal RiesgoPorcentaje { get; set; }
 
-	// --- Propiedades de Navegación ---
-	// Esto le permite a EF Core entender las relaciones (Foreign Keys)
+
+	// Propiedades de Navegacion
 	[ForeignKey("ExpedienteId")]
 	public virtual ExpedienteClinico Expediente { get; set; }
 }

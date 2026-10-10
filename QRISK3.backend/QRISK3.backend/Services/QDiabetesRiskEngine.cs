@@ -10,7 +10,6 @@ public class QDiabetesRiskEngine
 	// Almacenamos todas las estrategias registradas
 	private readonly IEnumerable<IQDiabetesModel> _models;
 
-	// .NET inyectará automáticamente TODAS las clases que implementen IQDiabetesModel
 	public QDiabetesRiskEngine(IEnumerable<IQDiabetesModel> models)
 	{
 		_models = models;
@@ -18,15 +17,15 @@ public class QDiabetesRiskEngine
 
 	public double Calculate10YearRisk(PatientData cleanedPatientData)
 	{
-		// 1. Filtrar la colección para obtener la estrategia correcta (Polimorfismo limpio)
+		// Filtrar la coleccion para obtener la estrategia correcta
 		IQDiabetesModel activeModel = cleanedPatientData.IsMale
 			? _models.OfType<MaleQDiabetesModel>().First()
 			: _models.OfType<FemaleQDiabetesModel>().First();
 
-		// 2. Obtener el predictor lineal ('a' en el código C)
+		// Obtener el predictor lineal ('a' en el codigo C original)
 		double linearPredictor = activeModel.CalculateLinearPredictor(cleanedPatientData);
 
-		// 3. Ecuación matemática final 
+		// Ecuacion matemática final 
 		double hazardMultiplier = Math.Exp(linearPredictor);
 		double survivalProbability = Math.Pow(activeModel.BaselineSurvival, hazardMultiplier);
 

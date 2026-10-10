@@ -39,11 +39,15 @@ const Step1Demographics = ({ formData, handleChange }) => {
           onChange={handleChange}
           style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db' }}
         >
-          <option value={1}>Blanco / Otro</option>
-          <option value={2}>Indio</option>
-          <option value={3}>Paquistaní</option>
-          <option value={8}>Negro Africano</option>
-          <option value={9}>Negro Caribeño</option>
+          <option value="1">Blanco / Caucásico</option>
+          <option value="2">Indio</option>
+          <option value="3">Pakistaní</option>
+          <option value="4">Bangladeshí</option>
+          <option value="5">Otro origen asiático</option>
+          <option value="6">Negro Caribeño</option>
+          <option value="7">Negro Africano</option>
+          <option value="8">Chino</option>
+          <option value="9">Otro grupo étnico (Mestizo / Latino)</option>
         </select>
       </FormGroup>
 

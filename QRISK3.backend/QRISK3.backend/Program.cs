@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using QRISK3.backend.Data;
 using QRISK3.backend.Entities;
 using QRISK3.backend.Interfaces;
 using QRISK3.backend.Models.Strategies;
 using QRISK3.backend.Services;
-using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -104,7 +105,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // -------------------------------------------------------------------
-// BLOQUE DE INYECCIÓN DE DATOS (SEEDING) AL ARRANCAR LA APLICACIÓN
+// BLOQUE DE INYECCION DE DATOS (SEEDING) AL ARRANCAR LA APLICACION
 // -------------------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
@@ -117,10 +118,10 @@ using (var scope = app.Services.CreateScope())
 		// Conexion inicial
 		context.Database.CanConnect();
 
-		// Opcional: Aplica las migraciones pendientes automáticamente
+		// Aplicar las migraciones pendientes automaticamente
 		context.Database.Migrate();
 
-		// Verificamos si YA existe un administrador en la base de datos
+		// Verificamos si ya existe un administrador en la base de datos
 		if (!context.Usuarios.Any(u => u.Rol == "Administrador"))
 		{
 			// Leemos los datos desde appsettings.json o Variables de Entorno
@@ -129,7 +130,7 @@ using (var scope = app.Services.CreateScope())
 
 			if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
 			{
-				// Hasheamos la contraseña de forma segura en tiempo de ejecución
+				// Hasheamos la contraseña de forma segura en tiempo de ejecucion
 				string passwordHasheada = BCrypt.Net.BCrypt.EnhancedHashPassword(adminPassword);
 
 				var adminUser = new Usuario

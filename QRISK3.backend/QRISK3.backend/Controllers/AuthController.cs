@@ -2,14 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using QRISK3.backend.Data;
-using QRISK3.backend.Entities;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using BC = BCrypt.Net.BCrypt;
+using QRISK3.backend.Data;
+using QRISK3.backend.Entities;
+using QRISK3.backend.DTOs.Requests;
+using BC = BCrypt.Net.BCrypt; // Alias para poder acceder a los metodos de BCrypt
+
 
 namespace QRISK3.backend.Controllers;
 
@@ -20,12 +22,11 @@ public class AuthController : ControllerBase
 	private readonly AppDbContext _dbContext;
 	private readonly IConfiguration _config;
 
+
 	public AuthController(AppDbContext dbContext, IConfiguration config)
 	{
 		_dbContext = dbContext;
 		_config = config;
-
-		_dbContext.Database.CanConnect();
 	}
 
 
@@ -34,50 +35,35 @@ public class AuthController : ControllerBase
 	{
 		try
 		{
-			// 1. Buscar usuario incluyendo su perfil de paciente vinculado
+			// Buscar usuario incluyendo su perfil de paciente vinculado
 			var usuario = await _dbContext.Usuarios
 				.Include(u => u.Paciente)
-					.ThenInclude(p => p.Expediente)
+				.ThenInclude(p => p.Expediente)
 				.FirstOrDefaultAsync(u => u.CorreoElectronico == request.Correo);
 
-			// 2. Validación (Asumiendo que guardaste contraseñas en texto plano por ahora, 
-			// o usando BCrypt.Verify si ya las hasheaste en el registro)
+			// Validacion (si el usuario es nulo, o si las contraseñas no son iguales, retornamos un error al cliente)
 			if (usuario == null || !BC.EnhancedVerify(request.Password, usuario.PasswordHash))
 			{
-				return Unauthorized(new { Success = false, Message = "Credenciales incorrectas." });
+				return Unauthorized(new
+				{
+					success = false,
+					message = "Credenciales incorrectas."
+				});
 			}
 
-			// 3. Construir los Claims (la carga útil del JWT)
-			var claims = new[]
-			{
-			new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
-			new Claim(JwtRegisteredClaimNames.Email, usuario.CorreoElectronico),
-			new Claim("rol", usuario.Rol),
-			new Claim("pacienteId", usuario.Paciente?.Id.ToString() ?? ""),
-			new Claim("expedienteId", usuario.Paciente?.Expediente?.Id.ToString() ?? "")
-		};
-
-			// 4. Firmar el Token
-			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-			var token = new JwtSecurityToken(
-				issuer: _config["Jwt:Issuer"],
-				audience: _config["Jwt:Audience"],
-				claims: claims,
-				expires: DateTime.UtcNow.AddHours(2), // Expira en 2 horas
-				signingCredentials: creds
-			);
+			// Generar el token JWT
+			var token = GenerarJwt(usuario);
 
 			return Ok(new
 			{
-				Success = true,
-				Token = new JwtSecurityTokenHandler().WriteToken(token)
+				success = true,
+				token = token
 			});
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"[ERROR CRÍTICO] AuthController: {ex.Message}");
+			Console.WriteLine(ex.StackTrace);
 
 			return StatusCode(500, new
 			{
@@ -92,16 +78,18 @@ public class AuthController : ControllerBase
 	{
 		try
 		{
-			// 1. Evitar duplicados
+			// Buscar el correo en la BD para evitar duplicados
 			if (await _dbContext.Usuarios.AnyAsync(u => u.CorreoElectronico == request.Correo))
 			{
-				return BadRequest(new { Success = false, Message = "El correo ya está registrado." });
+				return BadRequest(new
+				{
+					success = false,
+					message = "El correo ya está registrado."
+				});
 			}
 
-			// 2. Construir la jerarquía completa de entidades
-			// Entity Framework Core se encarga de insertar las llaves foráneas automáticamente
+			// Construir un nuevo usuario junto con su respectiva jerarquía de entidades
 			string passwordHasheada = BC.EnhancedHashPassword(request.Password);
-
 			var nuevoUsuario = new Usuario
 			{
 				CorreoElectronico = request.Correo,
@@ -123,18 +111,23 @@ public class AuthController : ControllerBase
 				}
 			};
 
-			// 3. Guardar en MySQL
+			// Guardar en la BD
 			_dbContext.Usuarios.Add(nuevoUsuario);
-			await _dbContext.SaveChangesAsync(); // Aquí se generan los IDs (Id, PacienteId, ExpedienteId)
+			await _dbContext.SaveChangesAsync();
 
-			// 4. Autenticar inmediatamente al usuario devolviendo un JWT
+			// Autenticar inmediatamente al usuario devolviendo un JWT
 			var token = GenerarJwt(nuevoUsuario);
 
-			return Ok(new { Success = true, Token = token });
+			return Ok(new
+			{
+				success = true,
+				token = token
+			});
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"[ERROR CRÍTICO] AuthController: {ex.Message}");
+			Console.WriteLine(ex.StackTrace);
 
 			return StatusCode(500, new
 			{
@@ -144,13 +137,8 @@ public class AuthController : ControllerBase
 		}
 	}
 
-	[HttpGet("ping")]
-	public ActionResult Ping()
-	{
-		return Ok();
-	}
 
-	// Método privado reutilizable para crear el token
+	// Utilizado para crear el token JWT
 	private string GenerarJwt(Usuario usuario)
 	{
 		var claims = new[]
@@ -176,14 +164,3 @@ public class AuthController : ControllerBase
 		return new JwtSecurityTokenHandler().WriteToken(token);
 	}
 }
-
-// DTOs para estructurar la entrada de datos
-public record LoginRequest(string Correo, string Password);
-public record RegistroRequest(
-	string Nombres,
-	string Apellidos,
-	DateTime FechaNacimiento,
-	string SexoBiologico,
-	string Correo,
-	string Password
-);

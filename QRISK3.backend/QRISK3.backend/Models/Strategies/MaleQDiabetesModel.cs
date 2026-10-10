@@ -11,22 +11,30 @@ public class MaleQDiabetesModel : IQDiabetesModel
 
 	// Matrices de riesgo condicional para hombres
 	private readonly double[] _ethnicityRisk = {
-		0, 0,
-		0.27719248760308279, 0.47446360714931268, 0.52961729919689371,
-		0.035100159186299017, -0.35807899669327919, -0.4005648523216514,
-		-0.41522792889830173, -0.26321348134749967
+		0,
+		0,
+		0.27719248760308279,
+		0.47446360714931268,
+		0.52961729919689371,
+		0.035100159186299017,
+		-0.35807899669327919,
+		-0.4005648523216514,
+		-0.41522792889830173,
+		-0.26321348134749967
 	};
 
 	private readonly double[] _smokeRisk = {
 		0,
-		0.19128222863388983, 0.55241588192645552,
-		0.63835053027506072, 0.78983819881858019
+		0.19128222863388983,
+		0.55241588192645552,
+		0.63835053027506072,
+		0.78983819881858019
 	};
 
 	public double CalculateLinearPredictor(PatientData patient)
 	{
-		// 1. Transformación con Polinomios Fraccionarios
-		// En los hombres, las potencias de la edad son -1 y 3 (muy distintas a las mujeres)
+		// Transformación con Polinomios Fraccionarios
+		// En los hombres, las potencias de la edad son -1 y 3
 		double age_1 = FractionalPolynomials.Transform(patient.Age, -1);
 		double age_2 = FractionalPolynomials.Transform(patient.Age, 3);
 
@@ -34,7 +42,7 @@ public class MaleQDiabetesModel : IQDiabetesModel
 		double bmi_1 = FractionalPolynomials.Transform(patient.Bmi.Value, -2);
 		double bmi_2 = FractionalPolynomials.TransformRepeated(patient.Bmi.Value, -2);
 
-		// 2. Centrado de variables continuas (Restar la media poblacional)
+		// Centrado de variables continuas (Restar la media poblacional)
 		age_1 -= 0.234766781330109;
 		age_2 -= 77.284080505371094;
 		bmi_1 -= 0.149176135659218;
@@ -45,7 +53,7 @@ public class MaleQDiabetesModel : IQDiabetesModel
 		double sbps5 = patient.SystolicBloodPressureStdDev - 8.756621360778809;
 		double town = patient.TownsendDeprivationScore - 0.526304900646210;
 
-		// 3. Inicio del Predictor Lineal
+		// Inicio del Predictor Lineal
 		double a = 0;
 
 		// Sumas Condicionales (Matrices)

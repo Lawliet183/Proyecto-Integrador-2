@@ -6,18 +6,18 @@
 /// que pueden ser imputados si el paciente los desconoce.
 /// </summary>
 public record PatientData(
-	// Demográficos
+	// Demograficos
 	double Age,
 	bool IsMale,
 	int EthnicityCode,
 	int SmokeCategory,
 	double TownsendDeprivationScore,
 
-	// Métricas Físicas (El peso y altura pueden ser nulos y llegar así a MySQL)
+	// Metricas Fisicas (El peso y altura pueden ser nulos y llegar asi a la BD)
 	double? Weight,
 	double? Height,
 
-	// Variables Clínicas con sus respectivas banderas de trazabilidad
+	// Variables Clinicas con sus respectivas banderas de trazabilidad
 	double? Bmi,
 	double? SystolicBloodPressure,
 	double? CholesterolHdlRatio,
@@ -28,14 +28,14 @@ public record PatientData(
 
 	double SystolicBloodPressureStdDev = 0.0,
 
-	// Historial Médico Cardiovascular y Metabólico
+	// Historial Medico Cardiovascular y Metabolico
 	bool IsTreatedForHypertension = false,
 	bool HasAtrialFibrillation = false,
 	bool HasType1Diabetes = false,
 	bool HasType2Diabetes = false,
 	bool HasFamilyHistoryCvd = false,
 
-	// Condiciones Comórbidas
+	// Condiciones Comorbidas
 	bool HasAtypicalAntipsychotics = false,
 	bool HasCorticosteroids = false,
 	bool HasMigraine = false,
@@ -45,6 +45,6 @@ public record PatientData(
 	bool HasSLE = false,
 	bool HasErectileDysfunction = false,
 
-	// Alerta Clínica Crítica (Exclusiva de tu proyecto)
+	// Alerta Clinica Critica
 	bool HasInvoluntaryWeightLoss = false
 );

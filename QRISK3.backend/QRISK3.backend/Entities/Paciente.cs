@@ -15,6 +15,7 @@ public class Paciente
 	[Column("usuario_id")]
 	public int UsuarioId { get; set; }
 
+
 	[Required]
 	[MaxLength(100)]
 	[Column("nombres")]
@@ -33,12 +34,13 @@ public class Paciente
 	[Column("sexo_biologico", TypeName = "enum('Masculino', 'Femenino')")]
 	public string SexoBiologico { get; set; }
 
-	// --- Propiedades de Navegación ---
 
-	// Relación hacia atrás con Usuario
+	// Propiedades de Navegación
+
+	// Relacion hacia atras con Usuario (1:1)
 	[ForeignKey("UsuarioId")]
 	public virtual Usuario Usuario { get; set; }
 
-	// Relación hacia adelante con su Expediente Clínico (1:1)
+	// Relacion hacia adelante con su Expediente Clinico (1:1)
 	public virtual ExpedienteClinico Expediente { get; set; }
 }

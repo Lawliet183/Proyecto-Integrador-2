@@ -11,21 +11,29 @@ public class FemaleQDiabetesModel : IQDiabetesModel
 
 	// Matrices de riesgo condicional (índice directo basado en la categoría)
 	private readonly double[] _ethnicityRisk = {
-		0, 0,
-		0.28040314332995425,  0.56298994142075398, 0.29590000851116516,
-		0.072785379877982545, -0.17072135508857317, -0.39371043314874971,
-		-0.32632495283530272, -0.17127056883241784
+		0,
+		0,
+		0.28040314332995425,
+		0.56298994142075398,
+		0.29590000851116516,
+		0.072785379877982545,
+		-0.17072135508857317,
+		-0.39371043314874971,
+		-0.32632495283530272,
+		-0.17127056883241784
 	};
 
 	private readonly double[] _smokeRisk = {
 		0,
-		0.13386833786546262, 0.56200858012438537,
-		0.66749593377502547, 0.84948177644830847
+		0.13386833786546262,
+		0.56200858012438537,
+		0.66749593377502547,
+		0.84948177644830847
 	};
 
 	public double CalculateLinearPredictor(PatientData patient)
 	{
-		// 1. Transformación con Polinomios Fraccionarios
+		// Transformación con Polinomios Fraccionarios
 		// En las mujeres, las potencias de la edad son -2 y 1
 		double age_1 = FractionalPolynomials.Transform(patient.Age, -2);
 		double age_2 = FractionalPolynomials.Transform(patient.Age, 1);
@@ -34,7 +42,7 @@ public class FemaleQDiabetesModel : IQDiabetesModel
 		double bmi_1 = FractionalPolynomials.Transform(patient.Bmi.Value, -2);
 		double bmi_2 = FractionalPolynomials.TransformRepeated(patient.Bmi.Value, -2);
 
-		// 2. Centrado de variables continuas (Restar la media poblacional)
+		// Centrado de variables continuas (Restar la media poblacional)
 		age_1 -= 0.053274843841791;
 		age_2 -= 4.332503318786621;
 		bmi_1 -= 0.154946178197861;
@@ -45,7 +53,7 @@ public class FemaleQDiabetesModel : IQDiabetesModel
 		double sbps5 = patient.SystolicBloodPressureStdDev - 9.002537727355957;
 		double town = patient.TownsendDeprivationScore - 0.392308831214905;
 
-		// 3. Inicio del Predictor Lineal
+		// Inicio del Predictor Lineal
 		double a = 0;
 
 		// Sumas Condicionales (Matrices)
@@ -63,7 +71,6 @@ public class FemaleQDiabetesModel : IQDiabetesModel
 		a += town * 0.077223790588590108;
 
 		// Sumas de Variables Booleanas
-		// Se utiliza la convención ternaria para transformar `true` en 1 y `false` en 0
 		a += ( patient.HasAtrialFibrillation ? 1 : 0 ) * 1.5923354969269663;
 		a += ( patient.HasAtypicalAntipsychotics ? 1 : 0 ) * 0.25237642070115557;
 		a += ( patient.HasCorticosteroids ? 1 : 0 ) * 0.59520725304601851;
