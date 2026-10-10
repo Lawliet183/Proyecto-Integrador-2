@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using BC = BCrypt.Net.BCrypt;
 
 namespace QRISK3.backend.Controllers;
 
@@ -39,7 +40,7 @@ public class AuthController : ControllerBase
 
 		// 2. Validación (Asumiendo que guardaste contraseñas en texto plano por ahora, 
 		// o usando BCrypt.Verify si ya las hasheaste en el registro)
-		if (usuario == null || usuario.PasswordHash != request.Password)
+		if (usuario == null || !BC.EnhancedVerify(request.Password, usuario.PasswordHash))
 		{
 			return Unauthorized(new { Success = false, Message = "Credenciales incorrectas." });
 		}
@@ -86,10 +87,12 @@ public class AuthController : ControllerBase
 
 			// 2. Construir la jerarquía completa de entidades
 			// Entity Framework Core se encarga de insertar las llaves foráneas automáticamente
+			string passwordHasheada = BC.EnhancedHashPassword(request.Password);
+
 			var nuevoUsuario = new Usuario
 			{
 				CorreoElectronico = request.Correo,
-				PasswordHash = request.Password, // Nota: En producción, recuerda hashear con BCrypt
+				PasswordHash = passwordHasheada,
 				Rol = "Paciente",
 				FechaRegistro = DateTime.UtcNow,
 

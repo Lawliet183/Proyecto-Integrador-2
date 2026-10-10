@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using QRISK3.backend.Data;
+using QRISK3.backend.Entities;
 using QRISK3.backend.Interfaces;
 using QRISK3.backend.Models.Strategies;
 using QRISK3.backend.Services;
@@ -101,5 +102,57 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// -------------------------------------------------------------------
+// BLOQUE DE INYECCIÓN DE DATOS (SEEDING) AL ARRANCAR LA APLICACIÓN
+// -------------------------------------------------------------------
+using (var scope = app.Services.CreateScope())
+{
+	var services = scope.ServiceProvider;
+	try
+	{
+		var context = services.GetRequiredService<AppDbContext>();
+		var configuration = services.GetRequiredService<IConfiguration>();
+
+		// Opcional: Aplica las migraciones pendientes automáticamente
+		context.Database.Migrate();
+
+		// Verificamos si YA existe un administrador en la base de datos
+		if (!context.Usuarios.Any(u => u.Rol == "Administrador"))
+		{
+			// Leemos los datos desde appsettings.json o Variables de Entorno
+			string adminEmail = configuration["AdminConfig:Email"];
+			string adminPassword = configuration["AdminConfig:Password"];
+
+			if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
+			{
+				// Hasheamos la contraseña de forma segura en tiempo de ejecución
+				string passwordHasheada = BCrypt.Net.BCrypt.EnhancedHashPassword(adminPassword);
+
+				var adminUser = new Usuario
+				{
+					CorreoElectronico = adminEmail,
+					PasswordHash = passwordHasheada,
+					Rol = "Administrador",
+					FechaRegistro = DateTime.UtcNow
+				};
+
+				context.Usuarios.Add(adminUser);
+				context.SaveChanges();
+
+				Console.WriteLine("Usuario administrador creado exitosamente desde la configuración.");
+			}
+			else
+			{
+				Console.WriteLine("Advertencia: No se encontraron credenciales de admin en la configuración.");
+			}
+		}
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine($"Ocurrió un error al inicializar la base de datos: {ex.Message}");
+	}
+}
+// -------------------------------------------------------------------
 
 app.Run();

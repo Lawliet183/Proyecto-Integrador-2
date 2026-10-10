@@ -12,6 +12,7 @@ import EvaluacionDetalle from './EvaluacionDetalle';
 
 // Importación de los componentes de seguridad
 import ProtectedRoute from './ProtectedRoute';
+import PublicRoute from './PublicRoute';
 
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
 
@@ -32,8 +33,10 @@ const App = () => {
     <Router>
       <Routes>
         {/* Rutas Públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/registro" element={<Register />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Register />} />
+        </Route>
 
         {/* Redirección por defecto para la raíz */}
         <Route path="/" element={<Navigate to="/login" replace />} />

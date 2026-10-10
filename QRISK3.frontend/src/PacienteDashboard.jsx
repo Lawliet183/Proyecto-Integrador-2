@@ -66,7 +66,7 @@ const DashboardContainer = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f4f7f6;
+  background-color: #f7f8fa;
   padding: 20px;
   font-family: Arial, sans-serif;
 `;
