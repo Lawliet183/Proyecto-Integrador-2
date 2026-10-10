@@ -32,22 +32,24 @@ public class AuthController : ControllerBase
 	[HttpPost("login")]
 	public async Task<IActionResult> Login([FromBody] LoginRequest request)
 	{
-		// 1. Buscar usuario incluyendo su perfil de paciente vinculado
-		var usuario = await _dbContext.Usuarios
-			.Include(u => u.Paciente)
-				.ThenInclude(p => p.Expediente)
-			.FirstOrDefaultAsync(u => u.CorreoElectronico == request.Correo);
-
-		// 2. Validación (Asumiendo que guardaste contraseñas en texto plano por ahora, 
-		// o usando BCrypt.Verify si ya las hasheaste en el registro)
-		if (usuario == null || !BC.EnhancedVerify(request.Password, usuario.PasswordHash))
+		try
 		{
-			return Unauthorized(new { Success = false, Message = "Credenciales incorrectas." });
-		}
+			// 1. Buscar usuario incluyendo su perfil de paciente vinculado
+			var usuario = await _dbContext.Usuarios
+				.Include(u => u.Paciente)
+					.ThenInclude(p => p.Expediente)
+				.FirstOrDefaultAsync(u => u.CorreoElectronico == request.Correo);
 
-		// 3. Construir los Claims (la carga útil del JWT)
-		var claims = new[]
-		{
+			// 2. Validación (Asumiendo que guardaste contraseñas en texto plano por ahora, 
+			// o usando BCrypt.Verify si ya las hasheaste en el registro)
+			if (usuario == null || !BC.EnhancedVerify(request.Password, usuario.PasswordHash))
+			{
+				return Unauthorized(new { Success = false, Message = "Credenciales incorrectas." });
+			}
+
+			// 3. Construir los Claims (la carga útil del JWT)
+			var claims = new[]
+			{
 			new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
 			new Claim(JwtRegisteredClaimNames.Email, usuario.CorreoElectronico),
 			new Claim("rol", usuario.Rol),
@@ -55,23 +57,34 @@ public class AuthController : ControllerBase
 			new Claim("expedienteId", usuario.Paciente?.Expediente?.Id.ToString() ?? "")
 		};
 
-		// 4. Firmar el Token
-		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-		var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+			// 4. Firmar el Token
+			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-		var token = new JwtSecurityToken(
-			issuer: _config["Jwt:Issuer"],
-			audience: _config["Jwt:Audience"],
-			claims: claims,
-			expires: DateTime.UtcNow.AddHours(2), // Expira en 2 horas
-			signingCredentials: creds
-		);
+			var token = new JwtSecurityToken(
+				issuer: _config["Jwt:Issuer"],
+				audience: _config["Jwt:Audience"],
+				claims: claims,
+				expires: DateTime.UtcNow.AddHours(2), // Expira en 2 horas
+				signingCredentials: creds
+			);
 
-		return Ok(new
+			return Ok(new
+			{
+				Success = true,
+				Token = new JwtSecurityTokenHandler().WriteToken(token)
+			});
+		}
+		catch (Exception ex)
 		{
-			Success = true,
-			Token = new JwtSecurityTokenHandler().WriteToken(token)
-		});
+			Console.WriteLine($"[ERROR CRÍTICO] AuthController: {ex.Message}");
+
+			return StatusCode(500, new
+			{
+				success = false,
+				message = "El servicio de autenticación no está disponible en este momento. Inténtalo de nuevo más tarde."
+			});
+		}
 	}
 
 	[HttpPost("registro")]
@@ -121,7 +134,13 @@ public class AuthController : ControllerBase
 		}
 		catch (Exception ex)
 		{
-			return StatusCode(500, new { Success = false, Error = ex.Message });
+			Console.WriteLine($"[ERROR CRÍTICO] AuthController: {ex.Message}");
+
+			return StatusCode(500, new
+			{
+				success = false,
+				message = "El servicio de autenticación no está disponible en este momento. Inténtalo de nuevo más tarde."
+			});
 		}
 	}
 

@@ -61,10 +61,10 @@ const Login = () => {
         // ---------------------------------------------------------
       } else {
         // Mostrar mensaje de credenciales incorrectas desde el backend
-        setError(data.message || 'Error al autenticar.');
+        setError(data.message || 'Credenciales incorrectas o error de autenticación.');
       }
     } catch (err) {
-      setError('Error de red. Verifica que el backend esté en ejecución: ' + err.message);
+      setError('No pudimos conectar con el servidor. Por favor, verifica tu conexión a internet o intenta más tarde.');
     } finally {
       setIsLoading(false);
     }

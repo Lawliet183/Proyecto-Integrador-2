@@ -91,7 +91,16 @@ public class EvaluacionController : ControllerBase
 		}
 		catch (Exception ex)
 		{
-			return StatusCode(500, new { Success = false, Error = ex.Message });
+			// El error real se queda en el servidor (puedes verlo en la consola)
+			Console.WriteLine($"[ERROR CRÍTICO] EvaluacionController: {ex.Message}");
+			Console.WriteLine(ex.StackTrace);
+
+			// Al frontend solo le enviamos un mensaje orientativo
+			return StatusCode(500, new
+			{
+				success = false,
+				message = "Ocurrió un problema inesperado al calcular el riesgo. Por favor, verifica tu conexión o inténtalo de nuevo en unos minutos."
+			});
 		}
 	}
 
@@ -122,16 +131,28 @@ public class EvaluacionController : ControllerBase
 	[Authorize]
 	public async Task<IActionResult> ObtenerDetalle(int id)
 	{
-		var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+		try
+		{
+			var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-		var evaluacion = await _context.EvaluacionesRiesgo
-			.Where(e => e.Id == id && e.Expediente.Paciente.UsuarioId.ToString() == userId)
-			.FirstOrDefaultAsync();
+			var evaluacion = await _context.EvaluacionesRiesgo
+				.Where(e => e.Id == id && e.Expediente.Paciente.UsuarioId.ToString() == userId)
+				.FirstOrDefaultAsync();
 
-		if (evaluacion == null)
-			return NotFound(new { success = false, message = "Evaluación no encontrada o no autorizada." });
+			if (evaluacion == null)
+				return NotFound(new { success = false, message = "Evaluación no encontrada o no autorizada." });
 
-		return Ok(new { success = true, data = evaluacion });
+			return Ok(new { success = true, data = evaluacion });
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"[ERROR CRÍTICO] EvaluacionController (ObtenerDetalle): {ex.Message}");
+			return StatusCode(500, new
+			{
+				success = false,
+				message = "No fue posible cargar los detalles de tu evaluación médica en este momento. Por favor, intenta de nuevo más tarde."
+			});
+		}
 	}
 
 

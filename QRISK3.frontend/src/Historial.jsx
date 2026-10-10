@@ -34,18 +34,20 @@ const Historial = () => {
           }
         });
 
-        const result = await response.json();
+        const result = await response.json().catch(() => null);
 
-        if (response.ok && result.success) {
+        if (response.ok && result?.success) {
           setEvaluaciones(result.data);
           if (result.nombrePaciente) {
             setNombrePaciente(result.nombrePaciente);
           }
         } else {
-          setError(result.message || 'No se pudo cargar el historial.');
+          // Usamos el mensaje seguro de C#, o uno genérico amigable si no hay JSON
+          setError(result?.message || 'No se pudo cargar la información de tu historial. Intenta recargar la página.');
         }
       } catch (err) {
-        setError('Error de red al intentar obtener el historial.');
+        // Mensaje empático en caso de desconexión total
+        setError('No pudimos conectar con el servidor médico. Por favor, verifica tu conexión a internet o intenta más tarde.');
       } finally {
         setLoading(false);
       }

@@ -22,15 +22,15 @@ const AdminPacientes = () => {
           }
         });
 
-        const result = await response.json();
+        const result = await response.json().catch(() => null);
 
         if (response.ok && result.success) {
           setPacientes(result.data);
         } else {
-          setError('No se pudieron cargar los datos o acceso denegado.');
+          setError(result?.message || 'No se pudieron cargar los registros. Verifica que tengas los permisos necesarios.');
         }
       } catch (err) {
-        setError('Error de conexión con el servidor.');
+        setError('Error de conexión. Verifica que el servidor principal esté en línea y vuelve a intentarlo.');
       } finally {
         setLoading(false);
       }

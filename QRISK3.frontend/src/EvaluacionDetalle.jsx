@@ -32,15 +32,15 @@ const EvaluacionDetalle = () => {
           }
         });
 
-        const result = await response.json();
+        const result = await response.json().catch(() => null);
 
-        if (response.ok && result.success) {
+        if (response.ok && result?.success) {
           setDetalle(result.data);
         } else {
-          setError(result.message || 'Error al cargar los detalles.');
+          setError(result?.message || 'No se pudieron cargar los detalles de esta evaluación.');
         }
       } catch (err) {
-        setError('Error de conexión con el servidor.');
+        setError('Parece que hay un problema de conexión. No pudimos descargar los detalles en este momento.');
       } finally {
         setLoading(false);
       }

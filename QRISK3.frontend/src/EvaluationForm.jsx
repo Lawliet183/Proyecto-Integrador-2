@@ -141,9 +141,9 @@ const EvaluationForm = () => {
         body: JSON.stringify(cleanedPayload)
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
-      if (response.ok && data.success) {
+      if (response.ok && data?.success) {
         const calcImc = formData.weight && formData.height
           ? formData.weight / (formData.height * formData.height)
           : 27.0;
@@ -153,11 +153,15 @@ const EvaluationForm = () => {
           imc: calcImc
         });
       } else {
-        // Ahora sí podremos ver el mensaje de error estructurado si algo falla
-        console.error("Error del servidor:", data.message || data);
+        // Mostramos el error seguro del backend en el cuadro rojo del Wizard
+        setFormError(data?.message || 'Ocurrió un problema al procesar los datos de tu evaluación. Por favor, intenta de nuevo.');
+        // Subimos la pantalla para que el paciente vea el error
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      console.error("Error de red:", error);
+      // Reemplazamos los console.error técnicos por notificaciones amigables en pantalla
+      setFormError('Parece que perdimos la conexión con el sistema médico. Por favor, revisa tu internet o inténtalo más tarde.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }

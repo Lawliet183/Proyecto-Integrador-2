@@ -101,7 +101,7 @@ const Register = ({ onNavigateToLogin }) => {
         setError(data.message || 'Ocurrió un error al registrar la cuenta.');
       }
     } catch (err) {
-      setError('Error de red. Verifica que el servidor backend esté encendido: ' + err.message);
+      setError('No pudimos conectar con el servidor. Por favor, verifica tu conexión a internet o intenta más tarde.');
     } finally {
       setIsLoading(false);
     }
