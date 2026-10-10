@@ -70,7 +70,7 @@ const EvaluacionDetalle = () => {
       </Header>
 
       <RiskBanner color={getRiskColor(detalle.riesgoPorcentaje)}>
-        <h3>Riesgo Cardiovascular a 10 años: {detalle.riesgoPorcentaje.toFixed(1)}%</h3>
+        <h3>Riesgo Cardiovascular a 10 años: {detalle.riesgoPorcentaje.toFixed(2)}%</h3>
         <p>Evaluación realizada el: {new Date(detalle.fechaEvaluacion).toLocaleDateString()} a las {new Date(detalle.fechaEvaluacion).toLocaleTimeString()}</p>
       </RiskBanner>
 

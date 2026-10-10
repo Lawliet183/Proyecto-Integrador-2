@@ -91,11 +91,11 @@ const Historial = () => {
               </CardHeader>
               <CardBody>
                 <p><span>Edad:</span> {ev.edadAlEvaluar} años</p>
-                <p><span>IMC:</span> {ev.imc.toFixed(1)}</p>
+                <p><span>IMC:</span> {ev.imc.toFixed(2)}</p>
                 <p><span>Presión Sistólica:</span> {ev.presionSistolica} mmHg</p>
 
                 <RiskResult color={getRiskColor(ev.riesgoPorcentaje)}>
-                  Riesgo a 10 años: {ev.riesgoPorcentaje.toFixed(1)}%
+                  Riesgo a 10 años: {ev.riesgoPorcentaje.toFixed(2)}%
                 </RiskResult>
                 
                 <button
