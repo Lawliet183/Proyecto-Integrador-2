@@ -62,6 +62,65 @@ const Historial = () => {
     if (riesgo >= 10 && riesgo < 20) return '#ffc107'; // Moderado (Amarillo)
     return '#dc3545'; // Alto (Rojo)
   };
+  
+  const exportarHistorialExcel = async () => {
+    if (!evaluaciones || evaluaciones.length === 0) {
+      alert("No hay evaluaciones registradas para exportar.");
+      return;
+    }
+
+    // 1. Importación dinámica de SheetJS
+    const XLSX = await import('xlsx');
+
+    // 2. Mapear los datos clínicos de interés
+    const datos = evaluaciones.map(ev => {
+      // Traducir el porcentaje a una etiqueta textual para el reporte
+      let nivelRiesgo = "Alto";
+      if (ev.riesgoPorcentaje < 10) nivelRiesgo = "Bajo";
+      else if (ev.riesgoPorcentaje < 20) nivelRiesgo = "Moderado";
+
+      return {
+        "Fecha de Evaluación": new Date(ev.fechaEvaluacion).toLocaleDateString(),
+        "Edad al Evaluar": ev.edadAlEvaluar,
+        "IMC": ev.imc.toFixed(2),
+        "Presión Sistólica (mmHg)": ev.presionSistolica,
+        "Riesgo QRISK3 (%)": ev.riesgoPorcentaje.toFixed(2),
+        "Nivel de Riesgo": nivelRiesgo
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(datos);
+
+    // 3. Configurar anchos de columna dinámicos para evitar los #####
+    worksheet['!cols'] = [
+      { wch: 20 }, // Fecha
+      { wch: 15 }, // Edad
+      { wch: 10 }, // IMC
+      { wch: 25 }, // Presión Sistólica
+      { wch: 20 }, // Riesgo QRISK3
+      { wch: 15 }  // Nivel de Riesgo
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Evolución Clínica");
+
+    // 4. Crear timestamp local
+    const ahora = new Date();
+    const año = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+    const timestampLocal = `${año}-${mes}-${dia}_${horas}-${minutos}-${segundos}`;
+
+    // 5. Generar nombre de archivo inteligente según el modo
+    const nombreArchivo = isAdminMode && nombrePaciente
+      ? `Historial_${nombrePaciente.replace(/\s+/g, '_')}_${timestampLocal}.xlsx`
+      : `Mi_Historial_QRISK3_${timestampLocal}.xlsx`;
+
+    XLSX.writeFile(workbook, nombreArchivo);
+  };
 
   return (
     <HistorialContainer>
@@ -71,9 +130,19 @@ const Historial = () => {
           {isAdminMode && nombrePaciente && <Subtitle>Paciente: {nombrePaciente}</Subtitle>}
           {!isAdminMode && <Subtitle>Tus resultados previos</Subtitle>}
         </div>
-        <BackButton onClick={() => navigate(isAdminMode ? '/admin/pacientes' : '/dashboard')}>
-          Volver
-        </BackButton>
+        <ButtonGroup>
+          <PrintButton onClick={() => window.print()}>
+            Imprimir Historial (PDF)
+          </PrintButton>
+          
+          <ExportButton onClick={exportarHistorialExcel}>
+            Descargar Historial (.xlsx)
+          </ExportButton>
+
+          <BackButton onClick={() => navigate(isAdminMode ? '/admin/pacientes' : '/dashboard')}>
+            Volver
+          </BackButton>
+        </ButtonGroup>
       </Header>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -116,7 +185,7 @@ const Historial = () => {
 // --- Estilos ---
 const HistorialContainer = styled.div`
   padding: 40px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
 `;
@@ -156,6 +225,9 @@ const RiskCard = styled.div`
   border-top: 5px solid ${(props) => props.borderColor};
   padding: 20px;
   transition: transform 0.2s;
+  
+  page-break-inside: avoid;
+  break-inside: avoid;
 
   &:hover {
     transform: translateY(-3px);
@@ -201,6 +273,43 @@ const BackButton = styled.button`
   cursor: pointer;
   font-weight: bold;
   &:hover { background-color: #5a6268; }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 15px; /* Crea una separación limpia entre los botones */
+  align-items: center;
+`;
+
+const ExportButton = styled.button`
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
+const PrintButton = styled.button`
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+
+  background-color: #1a73e8;
+  
+  &:hover {
+    background-color: #1557b0;
+  }
 `;
 
 export default Historial;

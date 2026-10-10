@@ -110,9 +110,9 @@ const DiagnosticResult = ({ riskPercentage, imc, onSave, onGoToDashboard }) => {
   else if (imc < 18.5) imcCategory = "Bajo peso";
 
   return (
-    <AuthContainer>
+    <AuthContainer className="print-single-card">
       <AuthCard>
-        <ResultTitle>Tu diagnostico</ResultTitle>
+        <ResultTitle>Tu diagnóstico</ResultTitle>
 
         <ChartContainer>
           <SvgRing>
@@ -140,10 +140,10 @@ const DiagnosticResult = ({ riskPercentage, imc, onSave, onGoToDashboard }) => {
           a un médico y mantener una actividad física constante.
         </Description>
 
-        <ButtonStack>
+        <ButtonStack className="no-print">
           {/* El botón oscuro principal */}
-          <PrimaryButton onClick={onSave} type="button">
-            Guardar resultados
+          <PrimaryButton onClick={() => window.print()} type="button">
+            Guardar reporte (PDF)
           </PrimaryButton>
 
           {/* El botón claro secundario */}

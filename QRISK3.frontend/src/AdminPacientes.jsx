@@ -43,12 +43,76 @@ const AdminPacientes = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
+  
+  const exportarExcel = async () => {
+    // 1. Validar que haya datos
+    if (!pacientes || pacientes.length === 0) {
+      alert("No hay pacientes para exportar");
+      return;
+    }
+
+    // 2. Importación dinámica: Descarga la librería solo cuando se hace clic, 
+    // protegiendo el tiempo de carga inicial de tu página web.
+    const XLSX = await import('xlsx');
+
+    // 3. Crear el arreglo de objetos con los nombres exactos de las columnas
+    const datos = pacientes.map(p => ({
+      "ID Paciente": p.id,
+      "Nombre Completo": `${p.nombres} ${p.apellidos}`,
+      "Edad": p.edad,
+      "Sexo Biológico": p.sexoBiologico,
+      "Correo Electrónico": p.correo,
+      "Fecha de Registro": p.fechaRegistro ? new Date(p.fechaRegistro).toLocaleDateString() : "N/A"
+    }));
+
+    // 4. Convertir el JSON a una hoja de trabajo de Excel
+    const worksheet = XLSX.utils.json_to_sheet(datos);
+
+    // 5. AUTO-EXPANDIR COLUMNAS: Definimos el ancho (en caracteres) de cada columna
+    const anchosDeColumna = [
+      { wch: 36 }, // A: ID Paciente (Los UUID son largos)
+      { wch: 35 }, // B: Nombre Completo
+      { wch: 10 }, // C: Edad
+      { wch: 15 }, // D: Sexo Biológico
+      { wch: 30 }, // E: Correo Electrónico
+      { wch: 20 }  // F: Fecha de Registro (Con 20 evitamos los ###)
+    ];
+    worksheet['!cols'] = anchosDeColumna;
+
+    // 6. Crear el libro de Excel y añadir la hoja
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Directorio Pacientes");
+
+    // Construir un timestamp local y seguro para nombres de archivo en Windows
+    const ahora = new Date();
+    const año = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+
+    // Formato final: 2026-10-09_23-21-08
+    const timestampLocal = `${año}-${mes}-${dia}_${horas}-${minutos}-${segundos}`;
+
+    // 7. Generar y descargar el archivo .xlsx nativo
+    XLSX.writeFile(workbook, `Directorio_Pacientes_${timestampLocal}.xlsx`);
+  };
 
   return (
     <DashboardContainer>
       <Header>
         <h2>Panel de Control - Pacientes Registrados</h2>
-        <LogoutButton onClick={handleCerrarSesion}>Cerrar Sesión</LogoutButton>
+        
+        <ButtonGroup>
+          <ExportButton onClick={exportarExcel}>
+            Descargar Excel (.xlsx)
+          </ExportButton>
+
+          <LogoutButton onClick={handleCerrarSesion}>
+            Cerrar Sesión
+          </LogoutButton>
+        </ButtonGroup>
       </Header>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -167,6 +231,20 @@ const ActionButton = styled.button`
 const LogoutButton = styled(ActionButton)`
   background-color: #dc3545;
   &:hover { background-color: #c82333; }
+`;
+
+const ExportButton = styled(ActionButton)`
+  background-color: #28a745; /* Verde estilo Excel */
+  
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
 `;
 
 export default AdminPacientes;

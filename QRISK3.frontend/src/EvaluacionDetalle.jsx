@@ -64,9 +64,15 @@ const EvaluacionDetalle = () => {
 
   return (
     <Container>
-      <Header>
+      <Header className="no-print">
         <h2>Detalle de la Evaluación</h2>
-        <BackButton onClick={() => navigate(-1)}>Volver al Historial</BackButton>
+        
+        <ButtonGroup>
+          <PrintButton onClick={() => window.print()}>Imprimir Expediente</PrintButton>
+          <BackButton onClick={() => navigate(-1)}>Volver al Historial</BackButton>
+        </ButtonGroup>
+        
+        
       </Header>
 
       <RiskBanner color={getRiskColor(detalle.riesgoPorcentaje)}>
@@ -141,6 +147,21 @@ const BackButton = styled.button`
   background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;
   &:hover { background-color: #5a6268; }
 `;
+
+const PrintButton = styled(BackButton)`
+  background-color: #1a73e8;
+  
+  &:hover {
+    background-color: #1557b0;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+`;
+
 const ErrorMessage = styled.p` color: #d93025; background: #fce8e6; padding: 10px; border-radius: 4px; margin-bottom: 20px; `;
 const RiskBanner = styled.div`
   background-color: ${(props) => props.color}15; border-left: 6px solid ${(props) => props.color}; padding: 20px; border-radius: 8px; margin-bottom: 30px;
@@ -149,7 +170,15 @@ const RiskBanner = styled.div`
 `;
 const Grid = styled.div` display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; `;
 const Card = styled.div` background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); `;
-const CardTitle = styled.h4` margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; color: #333; font-size: 18px; `;
+const CardTitle = styled.h4` 
+  margin-top: 0; 
+  border-bottom: 1px solid #eee; 
+  padding-bottom: 10px; 
+  margin-bottom: 15px; /* <- Agrega esta línea para darle aire al contenido */
+  color: #333; 
+  font-size: 18px; 
+`; 
+
 const DataRow = styled.div`
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 15px;
   span { font-weight: bold; color: #555; }
