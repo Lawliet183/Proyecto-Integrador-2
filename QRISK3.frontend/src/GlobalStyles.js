@@ -1,5 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
+
 export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
@@ -17,13 +18,13 @@ export const GlobalStyle = createGlobalStyle`
   }
     
   @media print {
-    /* 1. El margen se declara aquí para que el navegador lo aplique a TODAS las hojas */
+    /* El margen se declara aquí para que el navegador lo aplique a todas las hojas */
     @page {
       size: A4;
       margin: 1.5cm; /* Margen real para la página 1, 2, 3... */
     }
 
-    /* 2. Reseteamos el padding del contenedor principal */
+    /* Reseteamos el padding del contenedor principal */
     html, body, #root {
       background-color: #ffffff !important;
       margin: 0 !important;
@@ -33,7 +34,7 @@ export const GlobalStyle = createGlobalStyle`
       min-height: 0 !important; 
     }
 
-    /* 3. Expedientes largos (EvaluacionDetalle) */
+    /* Expedientes largos (EvaluacionDetalle) */
     #root > div {
       background-color: #ffffff !important;
       margin: 0 !important;
@@ -45,7 +46,7 @@ export const GlobalStyle = createGlobalStyle`
       box-sizing: border-box !important;
     }
 
-    /* 4. Tarjeta rápida centrada (DiagnosticResult) */
+    /* Tarjeta rápida centrada (DiagnosticResult) */
     #root > div.print-single-card {
       display: flex !important;
       flex-direction: column !important;

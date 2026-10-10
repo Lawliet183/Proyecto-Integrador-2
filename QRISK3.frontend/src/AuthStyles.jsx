@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+
 export const AuthContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -16,7 +17,7 @@ export const AuthCard = styled.div`
   max-width: 450px;
   padding: 40px;
   border-radius: 8px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05); /* Sombra suave como en tus capturas */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   text-align: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 `;
@@ -61,7 +62,7 @@ export const Input = styled.input`
 
 export const PrimaryButton = styled.button`
   width: 100%;
-  background-color: #212121; /* El botón oscuro de tus mockups */
+  background-color: #212121;
   color: #ffffff;
   font-size: 16px;
   font-weight: 500;

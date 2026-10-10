@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -14,8 +14,10 @@ const Historial = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  
   const isAdminMode = !!pacienteId;
 
+  
   useEffect(() => {
     const fetchHistorial = async () => {
       const token = localStorage.getItem('token');
@@ -42,11 +44,9 @@ const Historial = () => {
             setNombrePaciente(result.nombrePaciente);
           }
         } else {
-          // Usamos el mensaje seguro de C#, o uno genérico amigable si no hay JSON
           setError(result?.message || 'No se pudo cargar la información de tu historial. Intenta recargar la página.');
         }
       } catch (err) {
-        // Mensaje empático en caso de desconexión total
         setError('No pudimos conectar con el servidor médico. Por favor, verifica tu conexión a internet o intenta más tarde.');
       } finally {
         setLoading(false);
@@ -56,6 +56,7 @@ const Historial = () => {
     fetchHistorial();
   }, [pacienteId, isAdminMode]);
 
+  
   // Función para determinar el color según el porcentaje de riesgo QRISK3
   const getRiskColor = (riesgo) => {
     if (riesgo < 10) return '#28a745'; // Bajo (Verde)
@@ -63,16 +64,16 @@ const Historial = () => {
     return '#dc3545'; // Alto (Rojo)
   };
   
-  const exportarHistorialExcel = async () => {
+  const handleExportarHistorialExcel = async () => {
     if (!evaluaciones || evaluaciones.length === 0) {
       alert("No hay evaluaciones registradas para exportar.");
       return;
     }
 
-    // 1. Importación dinámica de SheetJS
+    // Importación dinámica de SheetJS
     const XLSX = await import('xlsx');
 
-    // 2. Mapear los datos clínicos de interés
+    // Mapear los datos clínicos de interés
     const datos = evaluaciones.map(ev => {
       // Traducir el porcentaje a una etiqueta textual para el reporte
       let nivelRiesgo = "Alto";
@@ -91,7 +92,7 @@ const Historial = () => {
 
     const worksheet = XLSX.utils.json_to_sheet(datos);
 
-    // 3. Configurar anchos de columna dinámicos para evitar los #####
+    // Configurar anchos de columna dinámicos
     worksheet['!cols'] = [
       { wch: 20 }, // Fecha
       { wch: 15 }, // Edad
@@ -104,7 +105,7 @@ const Historial = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Evolución Clínica");
 
-    // 4. Crear timestamp local
+    // Crear timestamp local
     const ahora = new Date();
     const año = ahora.getFullYear();
     const mes = String(ahora.getMonth() + 1).padStart(2, '0');
@@ -114,7 +115,7 @@ const Historial = () => {
     const segundos = String(ahora.getSeconds()).padStart(2, '0');
     const timestampLocal = `${año}-${mes}-${dia}_${horas}-${minutos}-${segundos}`;
 
-    // 5. Generar nombre de archivo inteligente según el modo
+    // Generar nombre de archivo segun el modo
     const nombreArchivo = isAdminMode && nombrePaciente
       ? `Historial_${nombrePaciente.replace(/\s+/g, '_')}_${timestampLocal}.xlsx`
       : `Mi_Historial_QRISK3_${timestampLocal}.xlsx`;
@@ -122,6 +123,39 @@ const Historial = () => {
     XLSX.writeFile(workbook, nombreArchivo);
   };
 
+  let gridContent = <p>Cargando registros...</p>;
+  if (!loading) {
+    if (evaluaciones.length === 0) {
+      gridContent = <p>No se encontraron evaluaciones registradas.</p>;
+    }
+    else {
+      gridContent = evaluaciones.map((ev) => (
+        <RiskCard key={ev.id} borderColor={getRiskColor(ev.riesgoPorcentaje)}>
+          <CardHeader>
+            <strong>{new Date(ev.fechaEvaluacion).toLocaleDateString()}</strong>
+          </CardHeader>
+          <CardBody>
+            <p><span>Edad:</span> {ev.edadAlEvaluar} años</p>
+            <p><span>IMC:</span> {ev.imc.toFixed(2)}</p>
+            <p><span>Presión Sistólica:</span> {ev.presionSistolica} mmHg</p>
+
+            <RiskResult color={getRiskColor(ev.riesgoPorcentaje)}>
+              Riesgo a 10 años: {ev.riesgoPorcentaje.toFixed(2)}%
+            </RiskResult>
+
+            <button
+              onClick={() => navigate(isAdminMode ? `/admin/evaluacion/detalle/${ev.id}` : `/evaluacion/detalle/${ev.id}`)}
+              style={{ marginTop: '15px', width: '100%', padding: '10px', backgroundColor: '#f4f7f6', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Ver Detalles Completos
+            </button>
+          </CardBody>
+        </RiskCard>
+      ));
+    }
+  }
+    
+  
   return (
     <HistorialContainer>
       <Header>
@@ -130,12 +164,13 @@ const Historial = () => {
           {isAdminMode && nombrePaciente && <Subtitle>Paciente: {nombrePaciente}</Subtitle>}
           {!isAdminMode && <Subtitle>Tus resultados previos</Subtitle>}
         </div>
+        
         <ButtonGroup>
           <PrintButton onClick={() => window.print()}>
             Imprimir Historial (PDF)
           </PrintButton>
           
-          <ExportButton onClick={exportarHistorialExcel}>
+          <ExportButton onClick={handleExportarHistorialExcel}>
             Descargar Historial (.xlsx)
           </ExportButton>
 
@@ -148,39 +183,12 @@ const Historial = () => {
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <GridContainer>
-        {loading ? (
-          <p>Cargando registros...</p>
-        ) : evaluaciones.length === 0 ? (
-          <p>No se encontraron evaluaciones registradas.</p>
-        ) : (
-          evaluaciones.map((ev) => (
-            <RiskCard key={ev.id} borderColor={getRiskColor(ev.riesgoPorcentaje)}>
-              <CardHeader>
-                <strong>{new Date(ev.fechaEvaluacion).toLocaleDateString()}</strong>
-              </CardHeader>
-              <CardBody>
-                <p><span>Edad:</span> {ev.edadAlEvaluar} años</p>
-                <p><span>IMC:</span> {ev.imc.toFixed(2)}</p>
-                <p><span>Presión Sistólica:</span> {ev.presionSistolica} mmHg</p>
-
-                <RiskResult color={getRiskColor(ev.riesgoPorcentaje)}>
-                  Riesgo a 10 años: {ev.riesgoPorcentaje.toFixed(2)}%
-                </RiskResult>
-                
-                <button
-                  onClick={() => navigate(isAdminMode ? `/admin/evaluacion/detalle/${ev.id}` : `/evaluacion/detalle/${ev.id}`)}
-                  style={{ marginTop: '15px', width: '100%', padding: '10px', backgroundColor: '#f4f7f6', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  Ver Detalles Completos
-                </button>
-              </CardBody>
-            </RiskCard>
-          ))
-        )}
+        {gridContent}
       </GridContainer>
     </HistorialContainer>
   );
 };
+
 
 // --- Estilos ---
 const HistorialContainer = styled.div`
@@ -277,7 +285,7 @@ const BackButton = styled.button`
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 15px; /* Crea una separación limpia entre los botones */
+  gap: 15px;
   align-items: center;
 `;
 
@@ -311,5 +319,6 @@ const PrintButton = styled.button`
     background-color: #1557b0;
   }
 `;
+
 
 export default Historial;

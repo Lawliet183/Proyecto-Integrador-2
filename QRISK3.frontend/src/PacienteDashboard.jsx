@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -6,12 +5,11 @@ const PacienteDashboard = () => {
   const navigate = useNavigate();
 
   const handleCerrarSesion = () => {
-    // Eliminamos el token de seguridad
     localStorage.removeItem('token');
-    // Redirigimos al login
     navigate('/login');
   };
 
+  
   return (
     <DashboardContainer>
       <WelcomeCard>
@@ -26,7 +24,8 @@ const PacienteDashboard = () => {
         </Header>
 
         <Description>
-          Bienvenido a tu panel de control. Desde aquí puedes gestionar tus evaluaciones de riesgo cardiovascular y consultar tu progreso histórico.
+          Bienvenido a tu panel de control. Desde aquí puedes gestionar tus evaluaciones 
+          de riesgo cardiovascular y consultar tu progreso histórico.
         </Description>
 
         <ButtonGroup>
@@ -60,7 +59,8 @@ const PacienteDashboard = () => {
   );
 };
 
-// --- Estilos ---
+
+// Estilos
 const DashboardContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -123,7 +123,9 @@ const PrimaryButton = styled.button`
   cursor: pointer;
   transition: background-color 0.2s;
 
-  &:hover { background-color: #1557b0; }
+  &:hover {
+    background-color: #1557b0;
+  }
 `;
 
 const SecondaryButton = styled(PrimaryButton)`
@@ -131,7 +133,9 @@ const SecondaryButton = styled(PrimaryButton)`
   color: #1a73e8;
   border: 2px solid #1a73e8;
 
-  &:hover { background-color: #f8fbff; }
+  &:hover {
+    background-color: #f8fbff;
+  }
 `;
 
 const LogoutContainer = styled.div`
@@ -154,5 +158,6 @@ const LogoutButton = styled.button`
     background-color: #c82333; 
   }
 `;
+
 
 export default PacienteDashboard;

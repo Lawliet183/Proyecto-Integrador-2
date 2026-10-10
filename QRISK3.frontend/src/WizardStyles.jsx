@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { AuthCard, PrimaryButton } from './AuthStyles'; // Reutilizamos la tarjeta base
 
+
 export const WizardCard = styled(AuthCard)`
   max-width: 650px; /* Un poco más ancho para las preguntas médicas */
 `;

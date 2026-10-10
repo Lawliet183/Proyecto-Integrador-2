@@ -1,12 +1,13 @@
-import React from 'react';
 import { FormGroup, Label, Input } from './AuthStyles';
 import { OptionsGrid, RadioLabel } from './WizardStyles';
+
 
 const Step2Clinical = ({ formData, handleChange }) => {
   return (
     <div>
       <p style={{ fontSize: '13px', color: '#666', marginBottom: '20px', textAlign: 'left' }}>
-        Nota: Si desconoce sus valores de laboratorio, déjelos en blanco. El sistema utilizará valores estadísticos estándar para su perfil.
+        Nota: Si desconoce sus valores de laboratorio, déjelos en blanco. El sistema
+        utilizará valores estadísticos estándar para su perfil.
       </p>
 
       <OptionsGrid>
@@ -44,7 +45,14 @@ const Step2Clinical = ({ formData, handleChange }) => {
               name="isTreatedForHypertension"
               value="true"
               checked={formData.isTreatedForHypertension === true}
-              onChange={() => handleChange({ target: { name: 'isTreatedForHypertension', value: true, type: 'checkbox', checked: true } })}
+              onChange={() => handleChange({
+                target: {
+                  name: 'isTreatedForHypertension',
+                  value: true,
+                  type: 'checkbox',
+                  checked: true
+                }
+              })}
             />
             Sí
           </RadioLabel>
@@ -54,7 +62,14 @@ const Step2Clinical = ({ formData, handleChange }) => {
               name="isTreatedForHypertension"
               value="false"
               checked={formData.isTreatedForHypertension === false}
-              onChange={() => handleChange({ target: { name: 'isTreatedForHypertension', value: false, type: 'checkbox', checked: false } })}
+              onChange={() => handleChange({
+                target: {
+                  name: 'isTreatedForHypertension',
+                  value: false,
+                  type: 'checkbox',
+                  checked: false
+                }
+              })}
             />
             No
           </RadioLabel>
@@ -63,5 +78,6 @@ const Step2Clinical = ({ formData, handleChange }) => {
     </div>
   );
 };
+
 
 export default Step2Clinical;

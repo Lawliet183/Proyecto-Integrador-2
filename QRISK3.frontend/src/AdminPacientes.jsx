@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
+
 
 const AdminPacientes = () => {
   const [pacientes, setPacientes] = useState([]);
@@ -10,9 +12,11 @@ const AdminPacientes = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  
   useEffect(() => {
     const fetchPacientes = async () => {
       const token = localStorage.getItem('token');
+      
       try {
         const response = await fetch(`${devServerUrl}/api/admin/pacientes`, {
           method: 'GET',
@@ -39,23 +43,23 @@ const AdminPacientes = () => {
     fetchPacientes();
   }, []);
 
+  
   const handleCerrarSesion = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
   
-  const exportarExcel = async () => {
-    // 1. Validar que haya datos
+  const handleExportarExcel = async () => {
+    // Validar que haya datos
     if (!pacientes || pacientes.length === 0) {
       alert("No hay pacientes para exportar");
       return;
     }
 
-    // 2. Importación dinámica: Descarga la librería solo cuando se hace clic, 
-    // protegiendo el tiempo de carga inicial de tu página web.
+    // Importacion dinamica de la libreria
     const XLSX = await import('xlsx');
 
-    // 3. Crear el arreglo de objetos con los nombres exactos de las columnas
+    // Crear el arreglo de objetos con los nombres exactos de las columnas
     const datos = pacientes.map(p => ({
       "ID Paciente": p.id,
       "Nombre Completo": `${p.nombres} ${p.apellidos}`,
@@ -65,21 +69,21 @@ const AdminPacientes = () => {
       "Fecha de Registro": p.fechaRegistro ? new Date(p.fechaRegistro).toLocaleDateString() : "N/A"
     }));
 
-    // 4. Convertir el JSON a una hoja de trabajo de Excel
+    // Convertir el JSON a una hoja de trabajo de Excel
     const worksheet = XLSX.utils.json_to_sheet(datos);
 
-    // 5. AUTO-EXPANDIR COLUMNAS: Definimos el ancho (en caracteres) de cada columna
+    // Auto expandir columnas: Definimos el ancho (en caracteres) de cada columna
     const anchosDeColumna = [
-      { wch: 36 }, // A: ID Paciente (Los UUID son largos)
+      { wch: 36 }, // A: ID Paciente
       { wch: 35 }, // B: Nombre Completo
       { wch: 10 }, // C: Edad
       { wch: 15 }, // D: Sexo Biológico
       { wch: 30 }, // E: Correo Electrónico
-      { wch: 20 }  // F: Fecha de Registro (Con 20 evitamos los ###)
+      { wch: 20 }  // F: Fecha de Registro
     ];
     worksheet['!cols'] = anchosDeColumna;
 
-    // 6. Crear el libro de Excel y añadir la hoja
+    // Crear el libro de Excel y añadir la hoja
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Directorio Pacientes");
 
@@ -92,20 +96,21 @@ const AdminPacientes = () => {
     const minutos = String(ahora.getMinutes()).padStart(2, '0');
     const segundos = String(ahora.getSeconds()).padStart(2, '0');
 
-    // Formato final: 2026-10-09_23-21-08
+    // Formato final: AAAA-MM-DD_hh-mm-ss
     const timestampLocal = `${año}-${mes}-${dia}_${horas}-${minutos}-${segundos}`;
 
-    // 7. Generar y descargar el archivo .xlsx nativo
+    // Generar y descargar el archivo .xlsx
     XLSX.writeFile(workbook, `Directorio_Pacientes_${timestampLocal}.xlsx`);
   };
 
+  
   return (
     <DashboardContainer>
       <Header>
         <h2>Panel de Control - Pacientes Registrados</h2>
         
         <ButtonGroup>
-          <ExportButton onClick={exportarExcel}>
+          <ExportButton onClick={handleExportarExcel}>
             Descargar Excel (.xlsx)
           </ExportButton>
 
@@ -141,7 +146,6 @@ const AdminPacientes = () => {
                   <td>{p.correo}</td>
                   <td>{new Date(p.fechaRegistro).toLocaleDateString()}</td>
                   <td>
-                    {/* Este botón enviará el ID del paciente a la ruta del historial cuando la construyamos */}
                     <ActionButton onClick={() => navigate(`/admin/historial/${p.id}`)}>
                       Ver Evaluaciones
                     </ActionButton>
@@ -161,7 +165,8 @@ const AdminPacientes = () => {
   );
 };
 
-// --- Estilos usando styled-components ---
+
+// Estilos usando styled-components
 const DashboardContainer = styled.div`
   padding: 40px;
   max-width: 1200px;
@@ -246,5 +251,6 @@ const ButtonGroup = styled.div`
   align-items: center;
   gap: 15px;
 `;
+
 
 export default AdminPacientes;

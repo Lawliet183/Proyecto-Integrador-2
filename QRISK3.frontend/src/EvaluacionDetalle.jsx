@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
+
 
 const EvaluacionDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Detectar si venimos de la ruta de admin
-  const isAdminMode = location.pathname.includes('/admin/');
-
+  
   const [detalle, setDetalle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Detectar si venimos de la ruta de admin
+  const isAdminMode = location.pathname.includes('/admin/');
 
+  
   useEffect(() => {
     const fetchDetalle = async () => {
       const token = localStorage.getItem('token');
@@ -49,30 +52,48 @@ const EvaluacionDetalle = () => {
     fetchDetalle();
   }, [id, isAdminMode]);
 
+  
   const getRiskColor = (riesgo) => {
     if (riesgo < 10) return '#28a745';
     if (riesgo >= 10 && riesgo < 20) return '#ffc107';
     return '#dc3545';
   };
 
-  const renderBool = (value) => value ? <Badge type="yes">Sí</Badge> : <Badge type="no">No</Badge>;
-  const renderImputed = (isImputed) => isImputed ? <ImputedTag>Valor imputado estadísticamente</ImputedTag> : null;
+  const renderBool = (value) => {
+    return value ? <Badge type="yes">Sí</Badge> : <Badge type="no">No</Badge>;
+  };
+  
+  const renderImputed = (isImputed) => {
+    return isImputed ? <ImputedTag>Valor imputado estadísticamente</ImputedTag> : null;
+  };
 
-  if (loading) return <Container><p>Cargando detalles...</p></Container>;
-  if (error) return <Container><ErrorMessage>{error}</ErrorMessage><BackButton onClick={() => navigate(-1)}>Volver</BackButton></Container>;
-  if (!detalle) return null;
+  if (loading) {
+    return <Container><p>Cargando detalles...</p></Container>;
+  }
 
+  if (error) {
+    return (
+      <Container>
+        <ErrorMessage>{error}</ErrorMessage>
+        <BackButton onClick={() => navigate(-1)}>Volver</BackButton>
+      </Container>
+    );
+  }
+  
+  if (!detalle) {
+    return null;
+  }
+
+  
   return (
     <Container>
       <Header className="no-print">
         <h2>Detalle de la Evaluación</h2>
         
         <ButtonGroup>
-          <PrintButton onClick={() => window.print()}>Imprimir Expediente</PrintButton>
+          <PrintButton onClick={() => window.print()}>Imprimir Expediente (PDF)</PrintButton>
           <BackButton onClick={() => navigate(-1)}>Volver al Historial</BackButton>
         </ButtonGroup>
-        
-        
       </Header>
 
       <RiskBanner color={getRiskColor(detalle.riesgoPorcentaje)}>
@@ -133,19 +154,34 @@ const EvaluacionDetalle = () => {
   );
 };
 
-// --- Estilos ---
+
+// Estilos
 const Container = styled.div`
   padding: 40px;
   max-width: 1000px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
 `;
+
 const Header = styled.div`
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 `;
+
 const BackButton = styled.button`
-  background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;
-  &:hover { background-color: #5a6268; }
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  
+  &:hover {
+    background-color: #5a6268;
+  }
 `;
 
 const PrintButton = styled(BackButton)`
@@ -162,35 +198,93 @@ const ButtonGroup = styled.div`
   gap: 15px;
 `;
 
-const ErrorMessage = styled.p` color: #d93025; background: #fce8e6; padding: 10px; border-radius: 4px; margin-bottom: 20px; `;
-const RiskBanner = styled.div`
-  background-color: ${(props) => props.color}15; border-left: 6px solid ${(props) => props.color}; padding: 20px; border-radius: 8px; margin-bottom: 30px;
-  h3 { color: ${(props) => props.color}; margin: 0 0 10px 0; font-size: 24px; }
-  p { margin: 0; color: #555; font-size: 14px; }
+const ErrorMessage = styled.p`
+  color: #d93025;
+  background: #fce8e6;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
 `;
-const Grid = styled.div` display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; `;
-const Card = styled.div` background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); `;
+  
+const RiskBanner = styled.div`
+  background-color: ${(props) => props.color}15;
+  border-left: 6px solid ${(props) => props.color};
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  
+  h3 {
+    color: ${(props) => props.color};
+    margin: 0 0 10px 0;
+    font-size: 24px;
+  }
+  
+  p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+  }
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+`;
+
+const Card = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+`;
+
 const CardTitle = styled.h4` 
   margin-top: 0; 
   border-bottom: 1px solid #eee; 
   padding-bottom: 10px; 
-  margin-bottom: 15px; /* <- Agrega esta línea para darle aire al contenido */
+  margin-bottom: 15px;
   color: #333; 
   font-size: 18px; 
 `; 
 
 const DataRow = styled.div`
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 15px;
-  span { font-weight: bold; color: #555; }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  
+  span {
+    font-weight: bold;
+    color: #555;
+  }
 `;
-const ComorbiditiesGrid = styled.div` display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); column-gap: 40px; row-gap: 5px; `;
+
+const ComorbiditiesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  column-gap: 40px;
+  row-gap: 5px;
+`;
+
 const Badge = styled.span`
   background-color: ${(props) => props.type === 'yes' ? '#28a745' : '#e9ecef'};
   color: ${(props) => props.type === 'yes' ? 'white' : '#6c757d'};
-  padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
 `;
+
 const ImputedTag = styled.small`
-  background-color: #17a2b8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 10px;
+  background-color: #17a2b8;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-left: 10px;
 `;
+
 
 export default EvaluacionDetalle;

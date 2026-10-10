@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { AuthContainer, AuthTitle, PrimaryButton } from './AuthStyles';
 import { WizardCard, StepIndicator, ButtonGroup, SecondaryButton } from './WizardStyles';
 
@@ -10,7 +9,9 @@ import Step2Clinical from './Step2Clinical';
 import Step3Comorbidities from './Step3Comorbidities';
 import DiagnosticResult from './DiagnosticResult';
 
+
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
+
 
 const EvaluationForm = () => {
   const navigate = useNavigate();
@@ -46,14 +47,15 @@ const EvaluationForm = () => {
     hasRheumatoidArthritis: false,
     hasSevereMentalIllness: false,
     hasSLE: false,
-    hasInvoluntaryWeightLoss: false, // Variable de alerta clínica
+    hasInvoluntaryWeightLoss: false, // Variable de alerta clinica
     hasErectileDysfunction: false
   });
 
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Convertimos los valores numéricos de los selects/inputs correctamente
+    // Convertimos los valores numericos de los selects/inputs
     let finalValue = value;
     if (type === 'number') {
       finalValue = value !== '' ? parseFloat(value) : '';
@@ -68,26 +70,26 @@ const EvaluationForm = () => {
   };
 
   const nextStep = () => {
-    setFormError(''); // Limpiamos errores previos
+    setFormError('');
 
-    // Validaciones exclusivas del Paso 1
+    // Validaciones del Paso 1 (Demograficos y Fisicos)
     if (currentStep === 1) {
       if (formData.weight !== null && formData.weight !== '') {
         if (formData.weight < 20 || formData.weight > 300) {
           setFormError('Por favor, ingresa un peso válido en kilogramos (ej. 75.5).');
-          return; // Detiene la ejecución, no avanza de paso
+          return;
         }
       }
 
       if (formData.height !== null && formData.height !== '') {
-        // Si el usuario digita algo mayor a 3 (ej. 178), asumimos que usó centímetros
+        // Si el usuario digita algo mayor a 3 (ej. 178), asumimos que uso centímetros
         if (formData.height < 0.5 || formData.height > 3.0) {
           setFormError('Por favor, ingresa una altura válida en metros (ej. 1.70).');
           return;
         }
       }
     }
-    // Validaciones del Paso 2 (Laboratorio y Clínico)
+    // Validaciones del Paso 2 (Laboratorio y Clinico)
     else if (currentStep === 2) {
       if (formData.systolicBloodPressure !== null && formData.systolicBloodPressure !== '') {
         if (formData.systolicBloodPressure < 70 || formData.systolicBloodPressure > 250) {
@@ -120,7 +122,7 @@ const EvaluationForm = () => {
         return;
       }
 
-      // --- NUEVO: Limpieza del Payload ---
+      // Limpieza del Payload
       // Clonamos el estado para no mutar directamente formData
       const cleanedPayload = { ...formData };
 
@@ -130,7 +132,6 @@ const EvaluationForm = () => {
           cleanedPayload[key] = null;
         }
       });
-      // ------------------------------------
 
       const response = await fetch(`${devServerUrl}/api/evaluacion`, {
         method: 'POST',
@@ -154,13 +155,10 @@ const EvaluationForm = () => {
           imc: calcImc
         });
       } else {
-        // Mostramos el error seguro del backend en el cuadro rojo del Wizard
         setFormError(data?.message || 'Ocurrió un problema al procesar los datos de tu evaluación. Por favor, intenta de nuevo.');
-        // Subimos la pantalla para que el paciente vea el error
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      // Reemplazamos los console.error técnicos por notificaciones amigables en pantalla
       setFormError('Parece que perdimos la conexión con el sistema médico. Por favor, revisa tu internet o inténtalo más tarde.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
@@ -170,24 +168,10 @@ const EvaluationForm = () => {
 
   const handleReset = () => {
     setResultData(null);
-    // setCurrentStep(1);
     navigate('/dashboard');
-    // Opcional: limpiar el formData si quieres que empiece desde cero
   };
 
-  // 1. Si ya tenemos resultados, renderizamos el componente de Diagnóstico
-  if (resultData) {
-    return (
-      <DiagnosticResult
-        riskPercentage={resultData.riskPercentage}
-        imc={resultData.imc}
-        onSave={() => navigate('/historial')}
-        onGoToDashboard={handleReset}
-      />
-    );
-  }
-
-  // 2. Función renderizadora del Wizard
+  // Función renderizadora del Wizard
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -200,8 +184,20 @@ const EvaluationForm = () => {
         return null;
     }
   };
+  
+  
+  // Si ya tenemos resultados, renderizamos el componente de Diagnóstico
+  if (resultData) {
+    return (
+      <DiagnosticResult
+        riskPercentage={resultData.riskPercentage}
+        imc={resultData.imc}
+        onGoToDashboard={handleReset}
+      />
+    );
+  }
+  
 
-  // 3. Renderizado de la estructura base del formulario
   return (
     <AuthContainer>
       <WizardCard>
@@ -254,5 +250,6 @@ const EvaluationForm = () => {
     </AuthContainer>
   );
 };
+
 
 export default EvaluationForm;

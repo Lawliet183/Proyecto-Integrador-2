@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import {
-  AuthContainer, AuthCard, AuthTitle,
-  FormGroup, Label, Input,
-  PrimaryButton, TextLink
+  AuthContainer,
+  AuthCard,
+  AuthTitle,
+  FormGroup,
+  Label,
+  Input,
+  PrimaryButton,
+  TextLink
 } from './AuthStyles';
 
+
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,6 +26,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({ ...prev, [name]: value }));
@@ -31,7 +39,6 @@ const Login = () => {
     setError('');
  
     try {
-      // Ajusta el puerto (ej. 5001) para coincidir con la ejecución de .NET
       const response = await fetch(`${devServerUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,23 +51,19 @@ const Login = () => {
         // Almacenar el token en el navegador
         localStorage.setItem('token', data.token);
 
-        // -- NUEVO CÓDIGO: Decodificar y redirigir según el rol --
+        // Decodificar y redirigir según el rol
         try {
           const decoded = jwtDecode(data.token);
           
           if (decoded.rol === 'Administrador') {
-            // Si es admin (puedes crear esta ruta más adelante)
             navigate('/admin/pacientes');
           } else {
-            // Si es paciente
             navigate('/dashboard');
           }
         } catch (error) {
           setError('Error al leer los datos de sesión.');
         }
-        // ---------------------------------------------------------
       } else {
-        // Mostrar mensaje de credenciales incorrectas desde el backend
         setError(data.message || 'Credenciales incorrectas o error de autenticación.');
       }
     } catch (err) {
@@ -70,6 +73,7 @@ const Login = () => {
     }
   };
 
+  
   return (
     <AuthContainer>
       <AuthCard>
@@ -120,5 +124,6 @@ const Login = () => {
     </AuthContainer>
   );
 };
+
 
 export default Login;

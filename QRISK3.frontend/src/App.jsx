@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GlobalStyle } from './GlobalStyles';
 
@@ -14,6 +13,7 @@ import EvaluacionDetalle from './EvaluacionDetalle';
 // Importación de los componentes de seguridad
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
+
 
 const App = () => {
   return (
@@ -32,12 +32,10 @@ const App = () => {
 
         {/* Rutas exclusivas del Paciente */}
         <Route element={<ProtectedRoute requiredRole="Paciente" />}>
-          {/* Agregamos el dashboard */}
           <Route path="/dashboard" element={<PacienteDashboard />} />
 
           <Route path="/evaluacion" element={<EvaluationForm />} />
 
-          {/* El paciente ve su historial sin pasar ID */}
           <Route path="/historial" element={<Historial />} />
 
           <Route path="/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
@@ -48,7 +46,6 @@ const App = () => {
         <Route element={<ProtectedRoute requiredRole="Administrador" />}>
           <Route path="/admin/pacientes" element={<AdminPacientes />} />
 
-          {/* El admin ve el historial pasando el ID en la URL */}
           <Route path="/admin/historial/:pacienteId" element={<Historial />} />
 
           <Route path="/admin/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
@@ -57,5 +54,6 @@ const App = () => {
     </Router>
   );
 };
+
 
 export default App;

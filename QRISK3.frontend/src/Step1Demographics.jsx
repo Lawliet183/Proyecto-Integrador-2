@@ -1,6 +1,6 @@
-import React from 'react';
 import { FormGroup, Label, Input } from './AuthStyles';
 import { OptionsGrid } from './WizardStyles';
+
 
 const Step1Demographics = ({ formData, handleChange }) => {
   return (
@@ -69,5 +69,6 @@ const Step1Demographics = ({ formData, handleChange }) => {
     </div>
   );
 };
+
 
 export default Step1Demographics;

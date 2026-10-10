@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -12,37 +12,11 @@ import {
   TextLink
 } from './AuthStyles';
 
-// Extendemos los estilos base localmente para manejar las columnas y el selector
-const GridRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 12px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  outline: none;
-  background-color: #ffffff;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-
-  &:focus {
-    border-color: #1a1a1a;
-  }
-`;
-
 
 const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
 
-const Register = ({ onNavigateToLogin }) => {
+
+const Register = () => {
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -54,9 +28,11 @@ const Register = ({ onNavigateToLogin }) => {
     password: '',
     confirmPassword: ''
   });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -73,7 +49,7 @@ const Register = ({ onNavigateToLogin }) => {
     setIsLoading(true);
 
     try {
-      // Mapeamos el estado local de React al DTO de C#
+      // Mapeamos el estado local de React al DTO del backend
       const payload = {
         Nombres: formData.nombres,
         Apellidos: formData.apellidos,
@@ -95,7 +71,7 @@ const Register = ({ onNavigateToLogin }) => {
         // Auto-login: guardamos el JWT recién creado
         localStorage.setItem('token', data.token);
 
-        // Redirigimos directamente al cuestionario médico
+        // Redirigimos directamente al dashboard del paciente
         navigate('/dashboard');
       } else {
         setError(data.message || 'Ocurrió un error al registrar la cuenta.');
@@ -107,9 +83,10 @@ const Register = ({ onNavigateToLogin }) => {
     }
   };
 
+  
   return (
     <AuthContainer>
-      <AuthCard style={{ maxWidth: '600px' }}> {/* Tarjeta más ancha para las columnas */}
+      <AuthCard style={{ maxWidth: '600px' }}>
         <AuthTitle>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
@@ -227,5 +204,34 @@ const Register = ({ onNavigateToLogin }) => {
     </AuthContainer>
   );
 };
+
+
+// Extendemos los estilos base localmente para manejar las columnas y el selector
+const GridRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #1a1a1a;
+  }
+`;
+
 
 export default Register;
