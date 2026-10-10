@@ -46,7 +46,8 @@ const EvaluationForm = () => {
     hasRheumatoidArthritis: false,
     hasSevereMentalIllness: false,
     hasSLE: false,
-    hasInvoluntaryWeightLoss: false // Variable de alerta clínica
+    hasInvoluntaryWeightLoss: false, // Variable de alerta clínica
+    hasErectileDysfunction: false
   });
 
   const handleChange = (e) => {

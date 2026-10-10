@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GlobalStyle } from './GlobalStyles';
 
 // Importación de las vistas
 import Login from './Login';
@@ -14,23 +15,10 @@ import EvaluacionDetalle from './EvaluacionDetalle';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
-const devServerUrl = import.meta.env.VITE_DEV_SERVER_URL;
-
 const App = () => {
-  useEffect(() => {
-    async function initialPing() {
-      try {
-        await fetch(`${devServerUrl}/api/auth/ping`);
-      } catch (error) {
-        console.error("Error al contactar con el servidor:", error);
-      }
-    }
-
-    initialPing();
-  }, []);
-  
   return (
     <Router>
+      <GlobalStyle />
       <Routes>
         {/* Rutas Públicas */}
         <Route element={<PublicRoute />}>
@@ -46,12 +34,12 @@ const App = () => {
         <Route element={<ProtectedRoute requiredRole="Paciente" />}>
           {/* Agregamos el dashboard */}
           <Route path="/dashboard" element={<PacienteDashboard />} />
-        
+
           <Route path="/evaluacion" element={<EvaluationForm />} />
 
           {/* El paciente ve su historial sin pasar ID */}
           <Route path="/historial" element={<Historial />} />
-          
+
           <Route path="/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
         </Route>
 
@@ -62,7 +50,7 @@ const App = () => {
 
           {/* El admin ve el historial pasando el ID en la URL */}
           <Route path="/admin/historial/:pacienteId" element={<Historial />} />
-          
+
           <Route path="/admin/evaluacion/detalle/:id" element={<EvaluacionDetalle />} />
         </Route>
       </Routes>

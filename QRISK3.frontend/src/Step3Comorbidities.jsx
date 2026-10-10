@@ -40,6 +40,7 @@ const Step3Comorbidities = ({ formData, handleChange }) => {
           {renderCheckbox('hasRheumatoidArthritis', 'Artritis Reumatoide')}
           {renderCheckbox('hasSevereMentalIllness', 'Enfermedad Mental Grave')}
           {renderCheckbox('hasSLE', 'Lupus (SLE)')}
+          {renderCheckbox('hasErectileDysfunction', 'Disfunción Eréctil (Solo hombres)')}
         </OptionsGrid>
       </FormGroup>
 

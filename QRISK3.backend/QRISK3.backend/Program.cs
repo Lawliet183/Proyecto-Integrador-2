@@ -34,7 +34,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var serverVersion = new MySqlServerVersion(ServerVersion.AutoDetect(connectionString));
 
 // Replace 'YourDbContext' with the name of your own DbContext derived class.
-builder.Services.AddDbContext<AppDbContext>(
+builder.Services.AddDbContextPool<AppDbContext>(
 	dbContextOptions => dbContextOptions
 		.UseMySql(connectionString, serverVersion)
 		// The following three options help with debugging, but should
@@ -113,6 +113,9 @@ using (var scope = app.Services.CreateScope())
 	{
 		var context = services.GetRequiredService<AppDbContext>();
 		var configuration = services.GetRequiredService<IConfiguration>();
+
+		// Conexion inicial
+		context.Database.CanConnect();
 
 		// Opcional: Aplica las migraciones pendientes automáticamente
 		context.Database.Migrate();

@@ -7,6 +7,7 @@ export const AuthContainer = styled.div`
   min-height: 100vh;
   background-color: #f7f8fa; /* Fondo gris muy claro para resaltar la tarjeta */
   padding: 20px;
+  box-sizing: border-box;
 `;
 
 export const AuthCard = styled.div`
